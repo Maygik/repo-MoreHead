@@ -1,2 +1,1 @@
-# repo-MoreHead
-酷酷化妆品
+提供简单unitypackage方便制作化妆品，详情请查阅r2。
