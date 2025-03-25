@@ -14,12 +14,15 @@ public class Morehead : BaseUnityPlugin
 {
     private const string PluginGuid = "Mhz.REPOMoreHead";
     private const string PluginName = "MoreHead";
-    private const string PluginVersion = "1.2.9";
+    private const string PluginVersion = "1.3.0";
     // 单例实例
     public static Morehead? Instance { get; private set; }
     
     // 日志记录器
     public new static ManualLogSource? Logger;
+    
+    // 获取插件版本号的公共方法
+    public static string GetPluginVersion() => PluginVersion;
     
     private void Awake()
     {

@@ -21,34 +21,33 @@ namespace MoreHead
         private static ManualLogSource? Logger => Morehead.Logger;
         
         // UI元素
-        private static REPOButton? menuButton;
         private static REPOPopupPage? decorationsPage;
         
         // 装饰物按钮字典
-        private static Dictionary<string?, REPOButton> decorationButtons = new Dictionary<string?, REPOButton>();
+        private static Dictionary<string?, REPOButton> decorationButtons = new();
         
         // 按标签分类的滚动视图元素字典
-        private static Dictionary<string, List<REPOScrollViewElement>> tagScrollViewElements = new Dictionary<string, List<REPOScrollViewElement>>();
+        private static Dictionary<string, List<REPOScrollViewElement>> tagScrollViewElements = new();
         
         // 标签筛选器
         private static string currentTagFilter = "ALL";
-        private static Dictionary<string, REPOButton> tagFilterButtons = new Dictionary<string, REPOButton>();
+        private static Dictionary<string, REPOButton> tagFilterButtons = new();
         
         // 装饰物数据缓存 - 存储所有标签的装饰物数据
-        private static Dictionary<string, List<DecorationInfo>> decorationDataCache = new Dictionary<string, List<DecorationInfo>>();
+        private static Dictionary<string, List<DecorationInfo>> decorationDataCache = new();
         
         // 按钮数据缓存 - 存储按钮文本和状态，避免重复计算
-        private static Dictionary<string, Dictionary<string, string>> buttonTextCache = new Dictionary<string, Dictionary<string, string>>();
+        private static Dictionary<string, Dictionary<string, string>> buttonTextCache = new();
         
         // 头像预览组件
         private static REPOAvatarPreview? avatarPreview;
 
         // 按钮和页面名称常量
         private const string BUTTON_NAME = "<color=#FF0000>M</color><color=#FF3300>O</color><color=#FF6600>R</color><color=#FF9900>E</color><color=#FFCC00>H</color><color=#FFDD00>E</color><color=#FFEE00>A</color><color=#FFFF00>D</color>";
-        private const string PAGE_TITLE = "Rotate robot: A/D";
+        private static readonly string PAGE_TITLE = $"Rotate robot: A/D <size=12><color=#AAAAAA>v{Morehead.GetPluginVersion()}</color></size>";
         
         // 所有可用标签
-        private static readonly string[] ALL_TAGS = new string[] { "ALL", "HEAD", "NECK", "BODY", "HIP", "WORLD" };
+        private static readonly string[] ALL_TAGS = { "ALL", "HEAD", "NECK", "BODY", "HIP", "WORLD" };
 
         // 初始化UI
         public static void Initialize()
@@ -57,7 +56,7 @@ namespace MoreHead
             {
                 // 创建ESC菜单按钮
                 MenuAPI.AddElementToEscapeMenu(parent => {
-                    menuButton = MenuAPI.CreateREPOButton(BUTTON_NAME, OnMenuButtonClick, parent, Vector2.zero);
+                    MenuAPI.CreateREPOButton(BUTTON_NAME, OnMenuButtonClick, parent, Vector2.zero);
                 });
                 
                 // 初始化数据缓存
@@ -193,6 +192,7 @@ namespace MoreHead
                 page.pageDimmerVisibility = true;
                 page.maskPadding = new Padding(10f, 10f, 20f, 10f);
                 page.headerTMP.rectTransform.position = new Vector3(170, 344, 0);
+                page.pageDimmerOpacity = 0.85f;
             }
             catch (Exception e)
             {
