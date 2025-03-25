@@ -309,6 +309,7 @@ namespace MoreHead
                 // 如果点击的是当前标签，不做任何操作
                 if (tag == currentTagFilter)
                 {
+                    decorationsPage?.scrollView.SetScrollPosition(0);
                     return;
                 }
                 
