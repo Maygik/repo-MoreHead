@@ -28,17 +28,17 @@ A simple and fun decoration mod that provides a **unitypackage** for players to 
 
 <div style="border: 2px solid red; padding: 10px; background-color: #fff0f0;">
 
-With **`MenuLib`** updated to **`2.0.0`**, **`MoreHead`** must be updated to **`1.2.8`** or later to function properly.
+With **`MenuLib`** updated to **`2.1.3`**, **`MoreHead`** must be updated to **`1.3.0`** or later to function properly.
 
-> <mark>⚠️ If you are still using **`MoreHead 1.2.7`** or earlier, please keep **`MenuLib`** at **`1.x`** to avoid compatibility issues.</mark>
+> <mark>⚠️ If you are still using **`MoreHead 1.2.8`** or earlier, please keep **`MenuLib`** at **`2.1.1`** or earlier to avoid compatibility issues.</mark>
 
 For the best experience and stability, we recommend always using the latest version.
 
 <br>
 
-**`MenuLib`** 已更新至 **`2.0.0`**，因此 **`MoreHead`** 需升级至 **`1.2.8`** 或更高版本才能正常运行。
+**`MenuLib`** 已更新至 **`2.1.3`**，因此 **`MoreHead`** 需升级至 **`1.3.0`** 或更高版本才能正常运行。
 
-> <mark>⚠️ 如果您仍在使用 **`MoreHead 1.2.7`** 或更早版本，请确保 **`MenuLib`** 仍为 **`1.x`**，否则可能会出现兼容性问题。</mark>
+> <mark>⚠️ 如果您仍在使用 **`MoreHead 1.2.8`** 或更早版本，请确保 **`MenuLib`** 仍为 **`2.1.1`** 或更早版本，否则可能会出现兼容性问题。</mark>
 
 为确保最佳体验和稳定性，建议始终使用最新版本。
 
@@ -49,8 +49,10 @@ For the best experience and stability, we recommend always using the latest vers
 ### Previously: 之前的版本
 <div style="border: 1px solid gray; padding: 10px; background-color: #f8f8f8;">
 
+**MenuLib** **2.0.0** → **MoreHead** **1.2.8+** required.  
 **MenuLib** **1.0.3** → **MoreHead** **1.1.8+** required.  
 
+**MenuLib** **2.0.0** → 需要 **MoreHead** **1.2.8+** 版本。  
 **MenuLib** **1.0.3** → 需要 **MoreHead** **1.1.8+** 版本。
 
 </div>

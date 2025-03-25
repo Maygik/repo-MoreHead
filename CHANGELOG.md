@@ -1,3 +1,11 @@
+# v1.3.0
+* 依赖 MenuLib 2.1.3，本版本及以后不再兼容 MenuLib 早期版本
+* 优化了UI界面的响应速度
+* 修复了一些小问题
+* Now requires MenuLib 2.1.3. Starting from this version, earlier versions of MenuLib are no longer supported.
+* Optimized UI interface response speed
+* Fixed some minor issues
+
 # v1.2.8
 * 依赖 MenuLib 2.0.0，本版本及以后不再兼容 MenuLib 1.x
 * 修复因 MenuLib 2.0.0 更新导致的兼容性问题，确保 Morehead 正常工作

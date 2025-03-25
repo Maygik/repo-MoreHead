@@ -161,8 +161,9 @@ namespace MoreHead
                 // 打开页面
                 decorationsPage.OpenPage(false);
                 
-                // 显示当前标签的装饰物
-                ShowTagDecorations(currentTagFilter);
+                // 延迟一帧显示当前标签的装饰物
+                UnityEngine.MonoBehaviour.FindObjectOfType<MonoBehaviour>()?.StartCoroutine(
+                    DelayedShowTagDecorations(currentTagFilter));
                 
                 // 创建或移动头像预览
                 UpdateAvatarPreview();
@@ -193,6 +194,7 @@ namespace MoreHead
                 page.maskPadding = new Padding(10f, 10f, 20f, 10f);
                 page.headerTMP.rectTransform.position = new Vector3(170, 344, 0);
                 page.pageDimmerOpacity = 0.85f;
+                page.scrollView.scrollSpeed = 4f;
             }
             catch (Exception e)
             {
@@ -916,11 +918,28 @@ namespace MoreHead
                 currentTagFilter = tag;
                 
                 // 更新滚动视图
-                decorationsPage?.scrollView?.UpdateElements();
+                decorationsPage.scrollView.SetScrollPosition(0);
+                decorationsPage.scrollView.UpdateElements();
             }
             catch (Exception e)
             {
                 Logger?.LogError($"显示标签 {tag} 的装饰物时出错: {e.Message}");
+            }
+        }
+
+        // 延迟显示标签装饰物
+        private static System.Collections.IEnumerator DelayedShowTagDecorations(string tag)
+        {
+            // 等待一帧
+            yield return null;
+            
+            try
+            {
+                ShowTagDecorations(tag);
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"延迟显示标签装饰物时出错: {e.Message}");
             }
         }
     }
