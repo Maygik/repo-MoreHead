@@ -136,18 +136,6 @@ namespace MoreHead
             
             try
             {
-                // 检查是否真的关闭了所有UI
-                var activeMenus = GameObject.FindObjectsOfType<MenuPage>();
-                foreach (var menu in activeMenus)
-                {
-                    //Logger?.LogInfo($"发现活动的菜单: {menu.name}");
-                    if (menu.name.Contains("Escape"))
-                    {
-                        //Logger?.LogInfo("强制关闭ESC菜单");
-                        menu.gameObject.SetActive(false);
-                    }
-                }
-                
                 // 如果装饰页面还没创建，则创建它
                 if (decorationsPage == null)
                 {
@@ -322,14 +310,11 @@ namespace MoreHead
                     return;
                 }
                 
-                // 更新当前标签筛选器
-                currentTagFilter = tag;
-                
-                // 更新标签按钮高亮状态
-                UpdateTagButtonHighlights();
-                
-                // 显示当前标签的装饰物
+                // 先显示当前标签的装饰物 (会更新currentTagFilter)
                 ShowTagDecorations(tag);
+                
+                // 然后更新标签按钮高亮状态
+                UpdateTagButtonHighlights();
                 
                 //Logger?.LogInfo($"切换到标签: {tag}");
             }
@@ -897,19 +882,28 @@ namespace MoreHead
         {
             try
             {
-                // 隐藏所有装饰物按钮
-                foreach (var button in decorationButtons.Values)
+                // 页面检查
+                if (decorationsPage == null)
+                    return;
+                
+                // 隐藏当前标签的装饰物按钮
+                if (!string.IsNullOrEmpty(currentTagFilter) && 
+                    tagScrollViewElements.TryGetValue(currentTagFilter, out var currentElements))
                 {
-                    if (button?.repoScrollViewElement != null)
+                    foreach (var element in currentElements)
                     {
-                        button.repoScrollViewElement.visibility = false;
+                        if (element != null)
+                        {
+                            element.visibility = false;
+                        }
                     }
                 }
                 
-                // 显示指定标签的装饰物按钮
-                if (tagScrollViewElements.TryGetValue(tag, out var elements))
+                // 显示新标签的装饰物按钮
+                if (!string.IsNullOrEmpty(tag) && 
+                    tagScrollViewElements.TryGetValue(tag, out var newElements))
                 {
-                    foreach (var element in elements)
+                    foreach (var element in newElements)
                     {
                         if (element != null)
                         {
@@ -918,6 +912,7 @@ namespace MoreHead
                     }
                 }
                 
+                // 更新当前标签
                 currentTagFilter = tag;
                 
                 // 更新滚动视图
