@@ -4,6 +4,22 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+        
+        <!-- 添加程序集版本信息 -->
+        <AssemblyVersion>1.2.9.0</AssemblyVersion>
+        <FileVersion>1.2.9.0</FileVersion>
+        <Version>1.2.9</Version>
+        <Authors>Masaicker, YurisCat</Authors>
+        <Company>YMC_MHZ</Company>
+        <Product>MoreHead</Product>
+        <Description>一个简单好玩的装饰模组，提供unitypackage，供玩家自行导入模型。</Description>
+        <Copyright>Copyright © 2025</Copyright>
+        <PackageProjectUrl>https://github.com/Masaicker/repo-MoreHead</PackageProjectUrl>
+        
+        <!-- 调试设置 -->
+        <DebugType>portable</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,7 +39,7 @@
         <HintPath>E:\Steam\steamapps\common\REPO\REPO_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
       </Reference>
       <Reference Include="MenuLib">
-        <HintPath>..\..\..\lib\MenuLib\2.0.0\MenuLib.dll</HintPath>
+        <HintPath>..\..\..\lib\MenuLib\2.1.0\MenuLib.dll</HintPath>
       </Reference>
       <Reference Include="Newtonsoft.Json">
         <HintPath>E:\Steam\steamapps\common\REPO\REPO_Data\Managed\Newtonsoft.Json.dll</HintPath>

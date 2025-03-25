@@ -27,6 +27,9 @@ namespace MoreHead
         // 装饰物按钮字典
         private static Dictionary<string?, REPOButton> decorationButtons = new Dictionary<string?, REPOButton>();
         
+        // 按标签分类的滚动视图元素字典
+        private static Dictionary<string, List<REPOScrollViewElement>> tagScrollViewElements = new Dictionary<string, List<REPOScrollViewElement>>();
+        
         // 标签筛选器
         private static string currentTagFilter = "ALL";
         private static Dictionary<string, REPOButton> tagFilterButtons = new Dictionary<string, REPOButton>();
@@ -37,6 +40,9 @@ namespace MoreHead
         // 按钮数据缓存 - 存储按钮文本和状态，避免重复计算
         private static Dictionary<string, Dictionary<string, string>> buttonTextCache = new Dictionary<string, Dictionary<string, string>>();
         
+        // 头像预览组件
+        private static REPOAvatarPreview? avatarPreview;
+
         // 按钮和页面名称常量
         private const string BUTTON_NAME = "<color=#FF0000>M</color><color=#FF3300>O</color><color=#FF6600>R</color><color=#FF9900>E</color><color=#FFCC00>H</color><color=#FFDD00>E</color><color=#FFEE00>A</color><color=#FFFF00>D</color>";
         private const string PAGE_TITLE = "Rotate robot: A/D";
@@ -96,7 +102,7 @@ namespace MoreHead
                     }
                 }
                 
-                Logger?.LogInfo($"数据缓存初始化完成，共缓存了 {ALL_TAGS.Length} 个标签的装饰物数据");
+                Logger?.LogInfo("数据缓存初始化完成");
             }
             catch (Exception e)
             {
@@ -109,30 +115,77 @@ namespace MoreHead
         {
             try
             {
-                // 创建新页面
-                decorationsPage = MenuAPI.CreateREPOPopupPage(PAGE_TITLE, true, 0, new Vector2(-200, 140));
+                // 先关闭所有现有UI，包括ESC菜单
+                MenuManager.instance.PageCloseAll();
                 
-                // 设置页面属性
-                SetupPopupPage(decorationsPage);
+                // 添加延迟确保所有UI已关闭
+                UnityEngine.MonoBehaviour.FindObjectOfType<MonoBehaviour>()?.StartCoroutine(
+                    DelayedOpenMoreHeadUI());
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"打开设置页面时出错: {e.Message}");
+            }
+        }
+        
+        // 延迟打开MoreHead UI，确保先关闭所有其他UI
+        private static System.Collections.IEnumerator DelayedOpenMoreHeadUI()
+        {
+            // 等待一帧，确保PageCloseAll执行完毕
+            yield return null;
+            
+            try
+            {
+                // 检查是否真的关闭了所有UI
+                var activeMenus = GameObject.FindObjectsOfType<MenuPage>();
+                foreach (var menu in activeMenus)
+                {
+                    //Logger?.LogInfo($"发现活动的菜单: {menu.name}");
+                    if (menu.name.Contains("Escape"))
+                    {
+                        //Logger?.LogInfo("强制关闭ESC菜单");
+                        menu.gameObject.SetActive(false);
+                    }
+                }
                 
-                // 使用缓存的数据创建页面内容
-                CreatePageContentWithCache(decorationsPage, currentTagFilter);
-                
-                // 添加作者标记
-                AddAuthorCredit(decorationsPage);
+                // 如果装饰页面还没创建，则创建它
+                if (decorationsPage == null)
+                {
+                    // 创建新页面并启用缓存
+                    //Logger?.LogInfo("创建新页面");
+                    decorationsPage = MenuAPI.CreateREPOPopupPage(PAGE_TITLE, true, true, 0, new Vector2(-299, 10));
+                    
+                    // 设置页面属性
+                    SetupPopupPage(decorationsPage);
+                    
+                    // 创建所有装饰物按钮
+                    CreateAllDecorationButtons(decorationsPage);
+                    
+                    // 创建标签筛选按钮
+                    CreateTagFilterButtons(decorationsPage);
+                    
+                    // 添加作者标记
+                    AddAuthorCredit(decorationsPage);
+                    
+                    // 添加操作按钮（关闭、清除所有）
+                    AddActionButtons(decorationsPage);
+                }
                 
                 // 打开页面
                 decorationsPage.OpenPage(false);
                 
-                // 移动玩家模型到前面
-                MovePlayerAvatarToFront();
+                // 显示当前标签的装饰物
+                ShowTagDecorations(currentTagFilter);
+                
+                // 创建或移动头像预览
+                UpdateAvatarPreview();
                 
                 // 更新所有按钮状态
                 UpdateButtonStates();
             }
             catch (Exception e)
             {
-                Logger?.LogError($"打开设置页面时出错: {e.Message}");
+                Logger?.LogError($"延迟打开设置页面时出错: {e.Message}");
             }
         }
         
@@ -144,11 +197,11 @@ namespace MoreHead
                 // 设置页面名称
                 if (page.gameObject != null)
                 {
-                    page.gameObject.name = $"MoreHead_Page_{currentTagFilter}";
+                    page.gameObject.name = "MoreHead_Page";
                 }
                 
                 // 设置页面大小和位置
-                page.rectTransform.sizeDelta = new Vector2(300f, 350f);
+                //page.rectTransform.sizeDelta = new Vector2(300f, 350f);
                 page.pageDimmerVisibility = true;
                 page.maskPadding = new Padding(10f, 10f, 20f, 10f);
                 page.headerTMP.rectTransform.position = new Vector3(170, 344, 0);
@@ -166,214 +219,13 @@ namespace MoreHead
             {
                 // 创建作者标记按钮（使用按钮作为文本显示，但不添加点击事件）
                 page.AddElement(parent => {
-                    var authorCredit = MenuAPI.CreateREPOButton("<size=10><color=#FFFFA0>Masaicker</color> and <color=#FFFFA0>Yuriscat</color> co-developed.\n由<color=#FFFFA0>马赛克了</color>和<color=#FFFFA0>尤里的猫</color>共同制作。</size>", () => {}, parent, new Vector2(300, 329));
-                    
-                    // 尝试获取按钮组件并修改其外观
-                    try
-                    {
-                        // 等待一帧以确保按钮已经创建
-                        UnityEngine.MonoBehaviour.FindObjectOfType<MenuManager>()?.StartCoroutine(DelayedStyleAuthorCredit(authorCredit));
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger?.LogWarning($"无法修改作者标记样式: {ex.Message}");
-                    }
+                    MenuAPI.CreateREPOButton("<size=10><color=#FFFFA0>Masaicker</color> and <color=#FFFFA0>Yuriscat</color> co-developed.\n由<color=#FFFFA0>马赛克了</color>和<color=#FFFFA0>尤里的猫</color>共同制作。</size>", () => {}, parent, new Vector2(300, 329));
                 });
             }
             catch (Exception e)
             {
                 Logger?.LogError($"添加作者标记时出错: {e.Message}");
             }
-        }
-        
-        // 延迟修改作者标记样式
-        private static System.Collections.IEnumerator DelayedStyleAuthorCredit(REPOButton button)
-        {
-            // 等待一帧
-            yield return null;
-            
-            try
-            {
-                // 查找按钮对象 - 使用更通用的方式查找
-                GameObject? buttonObj = null;
-                
-                // 查找所有按钮
-                var allButtons = GameObject.FindObjectsOfType<Button>();
-                foreach (var btn in allButtons)
-                {
-                    // 检查按钮名称是否包含作者信息
-                    if (btn.name.Contains("Masaicker") && btn.name.Contains("Yuriscat"))
-                    {
-                        buttonObj = btn.gameObject;
-                        break;
-                    }
-                }
-                
-                if (buttonObj != null)
-                {
-                    // 获取按钮组件
-                    var buttonComponent = buttonObj.GetComponent<Button>();
-                    if (buttonComponent != null)
-                    {
-                        // 禁用按钮交互
-                        buttonComponent.interactable = false;
-                        
-                        // 移除按钮背景
-                        var images = buttonObj.GetComponentsInChildren<Image>();
-                        foreach (var image in images)
-                        {
-                            if (image.gameObject != buttonComponent.gameObject)
-                            {
-                                image.enabled = false;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Logger?.LogWarning($"修改作者标记样式失败: {e.Message}");
-            }
-        }
-        
-        // 使用缓存的数据创建页面内容
-        private static void CreatePageContentWithCache(REPOPopupPage? page, string tag)
-        {
-            try
-            {
-                // 清空当前页面的按钮字典
-                decorationButtons.Clear();
-                
-                // 获取缓存的装饰物数据
-                if (!decorationDataCache.TryGetValue(tag, out var decorations))
-                {
-                    Logger?.LogWarning($"找不到标签 {tag} 的装饰物数据缓存");
-                    // 回退到直接查询装饰物
-                    decorations = HeadDecorationManager.Decorations
-                        .Where(decoration => tag == "ALL" || (decoration.ParentTag?.ToLower() == tag.ToLower()))
-                        .ToList();
-                }
-                
-                // 将装饰物分为内置模型和外部模型两组
-                var builtInDecorations = decorations
-                    .Where(decoration => IsBuiltInDecoration(decoration))
-                    .OrderBy(decoration => decoration.DisplayName)
-                    .ToList();
-                
-                var externalDecorations = decorations
-                    .Where(decoration => !IsBuiltInDecoration(decoration))
-                    .OrderBy(decoration => decoration.DisplayName)
-                    .ToList();
-                
-                // 首先添加内置模型按钮
-                foreach (var decoration in builtInDecorations)
-                {
-                    // 获取缓存的按钮文本
-                    string buttonText;
-                    if (!buttonTextCache.TryGetValue(tag, out var textCache) || 
-                        !textCache.TryGetValue(decoration.Name ?? string.Empty, out buttonText))
-                    {
-                        // 如果没有缓存，计算按钮文本
-                        buttonText = GetButtonText(decoration, decoration.IsVisible);
-                        
-                        // 更新缓存
-                        if (buttonTextCache.TryGetValue(tag, out textCache))
-                        {
-                            textCache[decoration.Name ?? string.Empty] = buttonText;
-                        }
-                    }
-                
-                    // 使用新版API添加按钮到滚动视图
-                    page?.AddElementToScrollView(scrollView => {
-                        var button = MenuAPI.CreateREPOButton(
-                            buttonText, 
-                            () => OnDecorationButtonClick(decoration.Name),
-                            scrollView,
-                            new Vector2(0, 0) // Y位置会被滚动视图自动调整
-                        );
-                        
-                        // 添加到当前页面的按钮字典
-                        decorationButtons[decoration.Name ?? string.Empty] = button;
-                        
-                        return button.rectTransform;
-                    }, topPadding: 2, bottomPadding: -20);
-                }
-                
-                // 然后添加外部模型按钮
-                foreach (var decoration in externalDecorations)
-                {
-                    // 获取缓存的按钮文本
-                    string buttonText;
-                    if (!buttonTextCache.TryGetValue(tag, out var textCache) || 
-                        !textCache.TryGetValue(decoration.Name ?? string.Empty, out buttonText))
-                    {
-                        // 如果没有缓存，计算按钮文本
-                        buttonText = GetButtonText(decoration, decoration.IsVisible);
-                        
-                        // 更新缓存
-                        if (buttonTextCache.TryGetValue(tag, out textCache))
-                        {
-                            textCache[decoration.Name ?? string.Empty] = buttonText;
-                        }
-                    }
-                    
-                    // 使用新版API添加按钮到滚动视图
-                    page?.AddElementToScrollView(scrollView => {
-                        var button = MenuAPI.CreateREPOButton(
-                            buttonText, 
-                            () => OnDecorationButtonClick(decoration.Name),
-                            scrollView,
-                            new Vector2(0, 0) // Y位置会被滚动视图自动调整
-                        );
-                        
-                        // 添加到当前页面的按钮字典
-                        decorationButtons[decoration.Name ?? string.Empty] = button;
-                        
-                        return button.rectTransform;
-                    }, topPadding: 2, bottomPadding: -20);
-                }
-                
-                // 创建标签筛选按钮
-                CreateTagFilterButtons(page);
-                
-                // 创建关闭按钮 - 放在页面底部，不在滚动区域内
-                page?.AddElement(parent => {
-                    MenuAPI.CreateREPOButton(
-                        "<size=18><color=#FFFFFF>C</color><color=#E6E6E6>L</color><color=#CCCCCC>O</color><color=#B3B3B3>S</color><color=#999999>E</color></size>", 
-                        OnCloseButtonClick, 
-                        parent, 
-                        new Vector2(301, 0)
-                    );
-                });
-                
-                // 创建"关闭所有模型"按钮 - 放在关闭按钮旁边，使用橙黄色底色和黑色文字
-                page?.AddElement(parent => {
-                    MenuAPI.CreateREPOButton(
-                        "<size=18><color=#FFAA00>CLEAR ALL</color></size>", 
-                        OnDisableAllButtonClick, 
-                        parent, 
-                        new Vector2(401, 0)
-                    );
-                });
-            }
-            catch (Exception e)
-            {
-                Logger?.LogError($"创建页面内容时出错: {e.Message}");
-            }
-        }
-        
-        // 创建页面内容 - 在初始化和切换标签时调用
-        private static void CreatePageContent()
-        {
-            // 使用当前标签创建页面内容
-            CreatePageContentWithCache(decorationsPage, currentTagFilter);
-        }
-        
-        // 为特定标签创建页面内容
-        private static void CreatePageContentForTag(REPOPopupPage? page, string tag)
-        {
-            // 为了向后兼容，调用新的方法
-            CreatePageContentWithCache(page, tag);
         }
         
         // 判断是否为内置模型
@@ -470,54 +322,20 @@ namespace MoreHead
                     return;
                 }
                 
-                // 关闭当前页面
-                if (decorationsPage != null)
-                {
-                    decorationsPage.ClosePage(true);
-                    decorationsPage = null;
-                }
-                
                 // 更新当前标签筛选器
                 currentTagFilter = tag;
                 
-                // 使用数据缓存创建新页面
-                CreateTagPage(tag);
+                // 更新标签按钮高亮状态
+                UpdateTagButtonHighlights();
+                
+                // 显示当前标签的装饰物
+                ShowTagDecorations(tag);
+                
+                //Logger?.LogInfo($"切换到标签: {tag}");
             }
             catch (Exception e)
             {
                 Logger?.LogError($"切换标签筛选时出错: {e.Message}");
-            }
-        }
-        
-        // 创建标签页面的方法
-        private static void CreateTagPage(string tag)
-        {
-            try
-            {
-                // 创建该标签的页面
-                decorationsPage = MenuAPI.CreateREPOPopupPage(PAGE_TITLE, true, 0, new Vector2(-200, 140));
-                
-                // 设置页面属性
-                SetupPopupPage(decorationsPage);
-                
-                // 使用缓存的数据创建页面内容
-                CreatePageContentWithCache(decorationsPage, tag);
-                
-                // 添加作者标记
-                AddAuthorCredit(decorationsPage);
-                
-                // 打开页面
-                decorationsPage.OpenPage(false);
-                
-                // 移动玩家模型到前面
-                MovePlayerAvatarToFront();
-                
-                // 更新所有按钮状态
-                UpdateButtonStates();
-            }
-            catch (Exception e)
-            {
-                Logger?.LogError($"创建标签页面时出错: {e.Message}");
             }
         }
         
@@ -689,7 +507,7 @@ namespace MoreHead
         {
             try
             {
-                // 关闭所有页面，模拟按下ESC键的效果
+                // 关闭所有页面，直接返回游戏
                 MenuManager.instance.PageCloseAll();
             }
             catch (Exception e)
@@ -752,75 +570,95 @@ namespace MoreHead
             return null;
         }
         
-        // 移动玩家模型到前面，防止被遮挡
-        private static void MovePlayerAvatarToFront()
+        // 更新/创建头像预览
+        private static void UpdateAvatarPreview()
         {
             try
             {
-                // 延迟执行，确保UI已经创建完成
-                UnityEngine.GameObject.FindObjectOfType<UnityEngine.MonoBehaviour>()?.StartCoroutine(
-                    DelayedMovePlayerAvatarToFront());
+                // 如果页面不存在，不做任何操作
+                if (decorationsPage == null)
+                {
+                    return;
+                }
+                
+                // 如果已存在头像预览，先销毁它
+                if (avatarPreview != null)
+                {
+                    SafeDestroyAvatar();
+                }
+                
+                // 创建新的头像预览
+                CreateAvatarPreview(decorationsPage);
             }
             catch (Exception e)
             {
-                Logger?.LogError($"移动玩家模型时出错: {e.Message}");
+                Logger?.LogError($"更新头像预览时出错: {e.Message}");
             }
         }
         
-        // 延迟执行移动玩家模型的协程
-        private static System.Collections.IEnumerator DelayedMovePlayerAvatarToFront()
+        // 创建头像预览
+        private static void CreateAvatarPreview(REPOPopupPage page)
         {
-            // 等待一帧，确保UI已经创建完成
-            yield return null;
-            
             try
             {
-                // 通过PlayerAvatarMenuHover组件查找玩家模型对象
-                var playerAvatarHover = UnityEngine.Object.FindObjectOfType<PlayerAvatarMenuHover>();
-                GameObject? playerAvatarObj = null;
-                if (playerAvatarHover != null)
-                {
-                    playerAvatarObj = playerAvatarHover.transform.parent.gameObject;
-                    // 检查父级名称是否正确
-                    if (playerAvatarObj.name != "Menu Element Player Avatar")
-                    {
-                        playerAvatarObj = null; // 如果名称不对，重置为null以便后续查找
-                    }
-                }
+                // 在页面上创建角色预览
+                page.AddElement(parent => {
+                    // 创建角色预览组件
+                    avatarPreview = MenuAPI.CreateREPOAvatarPreview(
+                        parent,
+                        new Vector2(420, 10),  // 预览位置
+                        false                  // 默认不启用背景图片
+                    );
+                });
                 
-                // 如果找不到或名称不对，尝试通过名称查找
-                if (playerAvatarObj == null)
+                // 标记为已创建
+
+                //Logger?.LogInfo("成功创建头像预览");
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"创建头像预览时出错: {e.Message}");
+            }
+        }
+        
+        // 安全销毁头像预览
+        private static void SafeDestroyAvatar()
+        {
+            try
+            {
+                if (avatarPreview != null)
                 {
-                    playerAvatarObj = GameObject.Find("Menu Element Player Avatar");
-                }
-                
-                if (playerAvatarObj != null)
-                {
-                    // 获取decorationsPage的Transform
-                    var menuPage = AccessTools.Field(typeof(REPOPopupPage), "menuPage").GetValue(decorationsPage) as MenuPage;
-                    if (menuPage != null)
+                    // 先将其从父级分离，避免OnDestroy时引用父级对象可能导致的问题
+                    if (avatarPreview.transform != null && avatarPreview.transform.parent != null)
                     {
-                        // 将玩家模型移动到decorationsPage下
-                        playerAvatarObj.transform.SetParent(menuPage.transform, true);
-                        
-                        // 将玩家模型移到最后，使其显示在最前面
-                        playerAvatarObj.transform.SetAsLastSibling();
-                        
-                        // 设置本地坐标
-                        playerAvatarObj.transform.localPosition = new Vector3(-76f, -30f, 0f);
+                        avatarPreview.transform.SetParent(null, false);
                     }
-                }
-                else
-                {
-                    Logger?.LogWarning("找不到玩家模型对象");
+                    
+                    // 主动清理预览对象内部的引用，避免OnDestroy时的空引用
+                    var playerAvatarVisuals = avatarPreview.playerAvatarVisuals;
+                    if (playerAvatarVisuals != null)
+                    {
+                        // 清理可能的引用，防止预览对象被销毁时抛出异常
+                        // 这里不做具体操作，只是防止空引用
+                    }
+                    
+                    // 销毁游戏对象
+                    if (avatarPreview.gameObject != null)
+                    {
+                        UnityEngine.Object.Destroy(avatarPreview.gameObject);
+                    }
+                    
+                    // 避免后续引用已销毁的对象
+                    avatarPreview = null;
                 }
             }
             catch (Exception e)
             {
-                Logger?.LogError($"延迟移动玩家模型时出错: {e.Message}");
+                Logger?.LogWarning($"安全销毁头像预览时出错，但这不影响功能: {e.Message}");
+                avatarPreview = null;
             }
         }
-
+        
         // "关闭所有模型"按钮点击事件
         private static void OnDisableAllButtonClick()
         {
@@ -879,14 +717,215 @@ namespace MoreHead
                 // 清空所有缓存的数据
                 decorationDataCache.Clear();
                 buttonTextCache.Clear();
-                decorationButtons.Clear();                
+                decorationButtons.Clear();
+                tagScrollViewElements.Clear();
+                
+                // 销毁现有页面
+                if (decorationsPage != null && decorationsPage.gameObject != null)
+                {
+                    UnityEngine.Object.Destroy(decorationsPage.gameObject);
+                    decorationsPage = null;
+                }
+                
+                // 安全销毁头像预览并重置标记
+                SafeDestroyAvatar();
+
                 // 重新初始化数据缓存
-                InitializeDataCache();                
+                InitializeDataCache();
+                
                 Logger?.LogInfo("UI已重新初始化，缓存已重置");
             }
             catch (Exception e)
             {
                 Logger?.LogError($"重新创建UI时出错: {e.Message}");
+            }
+        }
+
+        // 创建所有装饰物按钮
+        private static void CreateAllDecorationButtons(REPOPopupPage page)
+        {
+            try
+            {
+                // 清空现有数据
+                decorationButtons.Clear();
+                tagScrollViewElements.Clear();
+                
+                // 为每个标签初始化元素列表
+                foreach (string tag in ALL_TAGS)
+                {
+                    tagScrollViewElements[tag] = new List<REPOScrollViewElement>();
+                }
+                
+                // 获取所有装饰物并分为内置模型和外部模型
+                var allDecorations = HeadDecorationManager.Decorations.ToList();
+                
+                var builtInDecorations = allDecorations
+                    .Where(decoration => IsBuiltInDecoration(decoration))
+                    .OrderBy(decoration => decoration.DisplayName)
+                    .ToList();
+                
+                var externalDecorations = allDecorations
+                    .Where(decoration => !IsBuiltInDecoration(decoration))
+                    .OrderBy(decoration => decoration.DisplayName)
+                    .ToList();
+                
+                // 创建所有内置装饰物按钮
+                foreach (var decoration in builtInDecorations)
+                {
+                    CreateDecorationButton(page, decoration);
+                }
+                
+                // 创建所有外部装饰物按钮
+                foreach (var decoration in externalDecorations)
+                {
+                    CreateDecorationButton(page, decoration);
+                }
+                
+                Logger?.LogInfo($"创建了所有装饰物按钮，总共 {decorationButtons.Count} 个");
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"创建装饰物按钮时出错: {e.Message}");
+            }
+        }
+        
+        // 创建单个装饰物按钮
+        private static void CreateDecorationButton(REPOPopupPage page, DecorationInfo decoration)
+        {
+            try
+            {
+                // 获取装饰物名称和标签
+                string? decorationName = decoration.Name;
+                string? parentTag = decoration.ParentTag;
+                
+                if (string.IsNullOrEmpty(decorationName) || string.IsNullOrEmpty(parentTag))
+                {
+                    Logger?.LogWarning($"跳过创建按钮：装饰物名称或标签为空");
+                    return;
+                }
+                
+                // 获取或生成按钮文本
+                string buttonText = GetButtonText(decoration, decoration.IsVisible);
+                
+                // 更新按钮文本缓存
+                foreach (string tag in ALL_TAGS)
+                {
+                    if (tag == "ALL" || parentTag.ToLower() == tag.ToLower())
+                    {
+                        // 确保缓存存在
+                        if (!buttonTextCache.TryGetValue(tag, out var textCache))
+                        {
+                            buttonTextCache[tag] = new Dictionary<string, string>();
+                            textCache = buttonTextCache[tag];
+                        }
+                        
+                        // 更新缓存
+                        textCache[decorationName] = buttonText;
+                    }
+                }
+                
+                // 创建按钮
+                REPOButton? repoButton = null;
+                
+                page.AddElementToScrollView(scrollView => {
+                    repoButton = MenuAPI.CreateREPOButton(
+                        buttonText, 
+                        () => OnDecorationButtonClick(decorationName),
+                        scrollView
+                    );
+                    
+                    return repoButton.rectTransform;
+                });
+                
+                // 添加到按钮字典
+                if (repoButton != null)
+                {
+                    decorationButtons[decorationName] = repoButton;
+                    
+                    // 默认隐藏所有按钮
+                    repoButton.repoScrollViewElement.visibility = false;
+                    
+                    // 将按钮添加到对应的标签分类中
+                    tagScrollViewElements["ALL"].Add(repoButton.repoScrollViewElement);
+                    
+                    // 同时添加到父标签分类
+                    if (tagScrollViewElements.TryGetValue(parentTag.ToUpper(), out var elements))
+                    {
+                        elements.Add(repoButton.repoScrollViewElement);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"创建装饰物按钮时出错: {e.Message}");
+            }
+        }
+        
+        // 添加操作按钮（关闭、清除所有）
+        private static void AddActionButtons(REPOPopupPage page)
+        {
+            try
+            {
+                // 创建关闭按钮 - 放在页面底部，不在滚动区域内
+                page.AddElement(parent => {
+                    MenuAPI.CreateREPOButton(
+                        "<size=18><color=#FFFFFF>C</color><color=#E6E6E6>L</color><color=#CCCCCC>O</color><color=#B3B3B3>S</color><color=#999999>E</color></size>", 
+                        OnCloseButtonClick, 
+                        parent, 
+                        new Vector2(301, 0)
+                    );
+                });
+                
+                // 创建"关闭所有模型"按钮 - 放在关闭按钮旁边，使用橙黄色底色和黑色文字
+                page.AddElement(parent => {
+                    MenuAPI.CreateREPOButton(
+                        "<size=18><color=#FFAA00>CLEAR ALL</color></size>", 
+                        OnDisableAllButtonClick, 
+                        parent, 
+                        new Vector2(401, 0)
+                    );
+                });
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"添加操作按钮时出错: {e.Message}");
+            }
+        }
+        
+        // 显示指定标签的装饰物
+        private static void ShowTagDecorations(string tag)
+        {
+            try
+            {
+                // 隐藏所有装饰物按钮
+                foreach (var button in decorationButtons.Values)
+                {
+                    if (button?.repoScrollViewElement != null)
+                    {
+                        button.repoScrollViewElement.visibility = false;
+                    }
+                }
+                
+                // 显示指定标签的装饰物按钮
+                if (tagScrollViewElements.TryGetValue(tag, out var elements))
+                {
+                    foreach (var element in elements)
+                    {
+                        if (element != null)
+                        {
+                            element.visibility = true;
+                        }
+                    }
+                }
+                
+                currentTagFilter = tag;
+                
+                // 更新滚动视图
+                decorationsPage?.scrollView?.UpdateElements();
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"显示标签 {tag} 的装饰物时出错: {e.Message}");
             }
         }
     }

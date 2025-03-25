@@ -14,7 +14,7 @@ public class Morehead : BaseUnityPlugin
 {
     private const string PluginGuid = "Mhz.REPOMoreHead";
     private const string PluginName = "MoreHead";
-    private const string PluginVersion = "1.2.8";
+    private const string PluginVersion = "1.2.9";
     // 单例实例
     public static Morehead? Instance { get; private set; }
     
@@ -31,7 +31,7 @@ public class Morehead : BaseUnityPlugin
         
         try
         {
-            Harmony harmony = new Harmony("Mhz.REPOMoreHead");
+            Harmony harmony = new Harmony(PluginGuid);
             harmony.PatchAll(typeof(PlayerAvatarVisualsPatch));
             harmony.PatchAll(typeof(PlayerUpdatePatch));
             harmony.PatchAll(typeof(PlayerAvatarAwakePatch));
