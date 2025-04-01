@@ -1,3 +1,15 @@
+# v1.3.2
+* 增强了装饰品按钮悬停时显示模组来源功能
+* 支持DLL格式模组的装饰品正确显示来源
+* 点击当前标签页可返回列表顶部（1.3.0新增功能）
+* Enhanced display of mod source when hovering over decoration buttons
+* Added support for correctly showing the source of decorations from DLL format mods
+* Click on current tag to return to the top of the list (feature added in 1.3.0)
+
+# v1.3.1
+* 添加了一顶Nick'sHat，感谢nick制作的menulib模组，为社区带来便利
+* Added Nick's Hat. Thanks to Nick for creating the MenuLib mod, bringing convenience to the community.
+
 # v1.3.0
 * 依赖 MenuLib 2.1.3，本版本及以后不再兼容 MenuLib 早期版本
 * 优化了UI界面的响应速度
@@ -122,7 +134,6 @@ Special thanks to AnzunoHagi for testing and to multiple players for their feedb
 # v1.0.7
 * 为Odradek奥卓德克添加了更加炫酷的灯光效果
 * Added more impressive lighting effects for Odradek
-
 # v1.0.6
 * 添加了小丑鼻子、草帽、Odradek奥卓德克（带有灯光效果！）、竹蜻蜓（带有动画！）
 * Added clown nose, straw hat, Odradek (with lighting effects!), bamboo copter (with animation!)

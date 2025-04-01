@@ -6,9 +6,9 @@
         <LangVersion>latest</LangVersion>
         
         <!-- 添加程序集版本信息 -->
-        <AssemblyVersion>1.3.0.0</AssemblyVersion>
-        <FileVersion>1.3.0.0</FileVersion>
-        <Version>1.3.0</Version>
+        <AssemblyVersion>1.3.2.0</AssemblyVersion>
+        <FileVersion>1.3.2.0</FileVersion>
+        <Version>1.3.2</Version>
         <Authors>Masaicker, YurisCat</Authors>
         <Company>YMC_MHZ</Company>
         <Product>MoreHead</Product>
@@ -67,6 +67,9 @@
       </Reference>
       <Reference Include="UnityEngine.CoreModule">
         <HintPath>E:\Steam\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine.ImageConversionModule">
+        <HintPath>E:\Steam\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
       </Reference>
       <Reference Include="UnityEngine.InputLegacyModule">
         <HintPath>E:\Steam\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>

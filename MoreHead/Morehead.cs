@@ -8,13 +8,15 @@ using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 using MoreHead;
 using System;
+using TMPro;
+using System.Linq;
 
 [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
 public class Morehead : BaseUnityPlugin
 {
     private const string PluginGuid = "Mhz.REPOMoreHead";
     private const string PluginName = "MoreHead";
-    private const string PluginVersion = "1.3.0";
+    private const string PluginVersion = "1.3.2";
     // 单例实例
     public static Morehead? Instance { get; private set; }
     
@@ -41,6 +43,8 @@ public class Morehead : BaseUnityPlugin
             harmony.PatchAll(typeof(GameDirectorUpdatePatch));
             harmony.PatchAll(typeof(PlayerRevivePatch));
             harmony.PatchAll(typeof(MenuManagerStartPatch));
+            harmony.PatchAll(typeof(MenuButtonHoveringPatch));
+            harmony.PatchAll(typeof(MenuButtonHoverEndPatch));
             
             string asciiArt = @$"
 
@@ -657,6 +661,106 @@ class PlayerRevivePatch
         catch (System.Exception e)
         {
             Morehead.Logger?.LogError($"同步装饰物状态失败: {e.Message}");
+        }
+    }
+}
+
+// 装饰物按钮标识组件
+public class DecorationButtonMarker : MonoBehaviour
+{
+    // 关联的装饰物信息
+    public DecorationInfo? Decoration { get; set; }
+    
+    // 是否已经处理过悬停
+    public bool HasHandledHover { get; set; }
+}
+
+// 为MenuButton的OnHovering和OnHoverEnd方法添加补丁
+[HarmonyPatch(typeof(MenuButton))]
+[HarmonyPatch("OnHovering")]
+class MenuButtonHoveringPatch
+{
+    [HarmonyPostfix]
+    static void Postfix(MenuButton __instance)
+    {
+        try
+        {
+            // 获取按钮的标识组件
+            var marker = MoreHeadUI.buttonMarkers.Values.FirstOrDefault(m => m.gameObject == __instance.gameObject);
+            if (marker == null || marker.Decoration == null || marker.HasHandledHover)
+            {
+                return;
+            }
+
+            var decoration = marker.Decoration;
+            if (string.IsNullOrEmpty(decoration.ModName))
+            {
+                return;
+            }
+
+            // 使用decorationButtons获取按钮
+            if (MoreHeadUI.decorationButtons.TryGetValue(decoration.Name ?? string.Empty, out var button))
+            {
+                // 检查当前文本是否已经包含模组名称
+                if (!button.labelTMP.text.Contains(decoration.ModName))
+                {
+                    // 直接在当前文本后添加模组名称
+                    button.labelTMP.text = $"{button.labelTMP.text} <size=12><color=#AAAAAA>- {decoration.ModName}</color></size>";
+                }
+            }
+
+            // 标记已处理
+            marker.HasHandledHover = true;
+        }
+        catch (Exception e)
+        {
+            Morehead.Logger?.LogError($"MenuButton.OnHovering补丁出错: {e.Message}\n{e.StackTrace}");
+        }
+    }
+}
+
+[HarmonyPatch(typeof(MenuButton))]
+[HarmonyPatch("OnHoverEnd")]
+class MenuButtonHoverEndPatch
+{
+    [HarmonyPostfix]
+    static void Postfix(MenuButton __instance)
+    {
+        try
+        {
+            // 获取按钮的标识组件
+            var marker = MoreHeadUI.buttonMarkers.Values.FirstOrDefault(m => m.gameObject == __instance.gameObject);
+            if (marker == null || marker.Decoration == null)
+            {
+                return;
+            }
+
+            var decoration = marker.Decoration;
+            if (string.IsNullOrEmpty(decoration.ModName))
+            {
+                return;
+            }
+
+            // 使用decorationButtons获取按钮
+            if (MoreHeadUI.decorationButtons.TryGetValue(decoration.Name ?? string.Empty, out var button))
+            {
+                // 移除模组名称部分
+                string currentText = button.labelTMP.text;
+                string modNamePart = $" <size=12><color=#AAAAAA>- {decoration.ModName}</color></size>";
+                int modNameIndex = currentText.IndexOf(modNamePart);
+                if (modNameIndex != -1)
+                {
+                    // 移除整个模组名称部分（包括前面的空格和后面的颜色标签）
+                    button.labelTMP.text = currentText.Substring(0, modNameIndex).TrimEnd();
+                }
+            }
+
+            // 重置处理标志
+            marker.HasHandledHover = false;
+        }
+        catch (Exception e)
+        {
+            Morehead.Logger?.LogError($"MenuButton.OnHoverEnd补丁出错: {e.Message}\n{e.StackTrace}");
         }
     }
 }

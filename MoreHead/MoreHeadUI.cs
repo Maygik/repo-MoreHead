@@ -24,7 +24,10 @@ namespace MoreHead
         private static REPOPopupPage? decorationsPage;
         
         // 装饰物按钮字典
-        private static Dictionary<string?, REPOButton> decorationButtons = new();
+        public static Dictionary<string?, REPOButton> decorationButtons = new();
+        
+        // 按钮Marker组件缓存
+        public static Dictionary<string?, DecorationButtonMarker> buttonMarkers = new();
         
         // 按标签分类的滚动视图元素字典
         private static Dictionary<string, List<REPOScrollViewElement>> tagScrollViewElements = new();
@@ -454,6 +457,19 @@ namespace MoreHead
                 {
                     // 更新按钮文本以反映新状态
                     button.labelTMP.text = newButtonText;
+                    
+                    // 使用缓存的Marker组件
+                    if (buttonMarkers.TryGetValue(decorationName ?? string.Empty, out var marker) && 
+                        marker.Decoration != null && 
+                        !string.IsNullOrEmpty(marker.Decoration.ModName))
+                    {
+                        // 检查当前文本是否已经包含模组名称
+                        if (!button.labelTMP.text.Contains(marker.Decoration.ModName))
+                        {
+                            // 添加模组名称到按钮文本末尾
+                            button.labelTMP.text = $"{button.labelTMP.text} <size=12><color=#AAAAAA>- {marker.Decoration.ModName}</color></size>";
+                        }
+                    }
                 }
                 
                 // 更新玩家装饰物
@@ -706,6 +722,7 @@ namespace MoreHead
                 decorationDataCache.Clear();
                 buttonTextCache.Clear();
                 decorationButtons.Clear();
+                buttonMarkers.Clear(); // 清空Marker缓存
                 tagScrollViewElements.Clear();
                 
                 // 销毁现有页面
@@ -821,6 +838,11 @@ namespace MoreHead
                         () => OnDecorationButtonClick(decorationName),
                         scrollView
                     );
+                    
+                    // 添加DecorationButtonMarker组件并缓存
+                    var marker = repoButton.gameObject.AddComponent<DecorationButtonMarker>();
+                    marker.Decoration = decoration;
+                    buttonMarkers[decorationName] = marker;
                     
                     return repoButton.rectTransform;
                 });

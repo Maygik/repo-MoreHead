@@ -28,6 +28,9 @@ namespace MoreHead
         
         // 装饰物AB包路径
         public string? BundlePath { get; set; }
+        
+        // 所属模组名称
+        public string? ModName { get; set; }
     }
     
     // 头部装饰物管理器
@@ -298,7 +301,8 @@ namespace MoreHead
                         IsVisible = false, // 默认不显示
                         Prefab = prefab,
                         ParentTag = parentTag,
-                        BundlePath = bundlePath
+                        BundlePath = bundlePath,
+                        ModName = GetModNameFromPath(bundlePath)
                     };
                     
                     // 添加到装饰物列表
@@ -498,6 +502,10 @@ namespace MoreHead
                 int loadedCount = 0;
                 string assemblyName = assembly.GetName().Name;
                 
+                // 获取DLL文件名（包含.dll后缀）作为模组名
+                string dllPath = assembly.Location;
+                string modName = Path.GetFileName(dllPath);
+                
                 // 初始化该Assembly的装饰物列表
                 if (!externalDecorations.ContainsKey(assemblyName))
                 {
@@ -574,10 +582,12 @@ namespace MoreHead
                 // 将新增的装饰物添加到该Assembly的记录中
                 if (loadedCount > 0)
                 {
-                    // 将新增的装饰物添加到externalDecorations中
+                    // 将新增的装饰物添加到externalDecorations中，并设置模组名
                     for (int i = startIndex; i < Decorations.Count; i++)
                     {
-                        externalDecorations[assemblyName].Add(Decorations[i]);
+                        var decoration = Decorations[i];
+                        decoration.ModName = modName; // 设置DLL文件名作为模组名
+                        externalDecorations[assemblyName].Add(decoration);
                     }
                     
                     Logger?.LogInfo($"成功从DLL {assemblyName} 加载了 {loadedCount} 个资源，已保存到外部装饰物记录中");
@@ -656,6 +666,63 @@ namespace MoreHead
             catch (Exception e)
             {
                 Logger?.LogError($"重新创建UI时出错: {e.Message}");
+            }
+        }
+
+        // 获取模组名称
+        private static string? GetModNameFromPath(string? bundlePath)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(bundlePath))
+                    return null;
+                
+                // 获取官方插件目录
+                string pluginsDirectory = BepInEx.Paths.PluginPath;
+                
+                // 验证插件目录是否有效
+                if (string.IsNullOrEmpty(pluginsDirectory) || !Directory.Exists(pluginsDirectory))
+                {
+                    return null;
+                }
+                
+                // 检查是否在BepInEx/plugins目录下
+                if (!bundlePath.StartsWith(pluginsDirectory, StringComparison.OrdinalIgnoreCase))
+                    return null;
+                
+                // 获取文件所在的文件夹
+                string? parentDirectory = Path.GetDirectoryName(bundlePath);
+                if (string.IsNullOrEmpty(parentDirectory))
+                    return null;
+                
+                // 处理直到找到plugins目录下的文件夹
+                string directoryName = parentDirectory;
+                while (!string.IsNullOrEmpty(directoryName) && 
+                       !Directory.GetParent(directoryName)?.FullName.Equals(pluginsDirectory, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    directoryName = Directory.GetParent(directoryName)?.FullName ?? string.Empty;
+                }
+                
+                if (string.IsNullOrEmpty(directoryName))
+                    return null;
+                
+                // 获取文件夹名称
+                string folderName = Path.GetFileName(directoryName);
+                
+                // 提取最后一个'-'后的内容作为模组名
+                string modName = folderName;
+                int lastDashIndex = folderName.LastIndexOf('-');
+                if (lastDashIndex >= 0 && lastDashIndex < folderName.Length - 1)
+                {
+                    modName = folderName.Substring(lastDashIndex + 1);
+                }
+                
+                return modName;
+            }
+            catch (Exception e)
+            {
+                Morehead.Logger?.LogError($"获取模组名称时出错: {e.Message}");
+                return null;
             }
         }
     }
