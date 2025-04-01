@@ -16,7 +16,7 @@ public class Morehead : BaseUnityPlugin
 {
     private const string PluginGuid = "Mhz.REPOMoreHead";
     private const string PluginName = "MoreHead";
-    private const string PluginVersion = "1.3.2";
+    private const string PluginVersion = "1.3.3";
     // 单例实例
     public static Morehead? Instance { get; private set; }
     
@@ -685,8 +685,35 @@ class MenuButtonHoveringPatch
     {
         try
         {
-            // 获取按钮的标识组件
-            var marker = MoreHeadUI.buttonMarkers.Values.FirstOrDefault(m => m.gameObject == __instance.gameObject);
+            // 确保实例有效
+            if (__instance == null)
+                return;
+
+            // 检查游戏对象是否有效
+            if (__instance.gameObject == null || !__instance.gameObject.activeInHierarchy)
+                return;
+
+            // 安全查找按钮标记组件
+            DecorationButtonMarker? marker = null;
+            try
+            {
+                // 使用更安全的方式查找按钮标记
+                foreach (var m in MoreHeadUI.buttonMarkers.Values)
+                {
+                    if (m != null && m.gameObject != null && m.gameObject == __instance.gameObject)
+                    {
+                        marker = m;
+                        break;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // 查找失败则直接返回
+                return;
+            }
+
+            // 如果未找到匹配的标记或标记无效，则退出
             if (marker == null || marker.Decoration == null || marker.HasHandledHover)
             {
                 return;
@@ -701,6 +728,9 @@ class MenuButtonHoveringPatch
             // 使用decorationButtons获取按钮
             if (MoreHeadUI.decorationButtons.TryGetValue(decoration.Name ?? string.Empty, out var button))
             {
+                if (button == null || button.labelTMP == null)
+                    return;
+
                 // 检查当前文本是否已经包含模组名称
                 if (!button.labelTMP.text.Contains(decoration.ModName))
                 {
@@ -728,8 +758,35 @@ class MenuButtonHoverEndPatch
     {
         try
         {
-            // 获取按钮的标识组件
-            var marker = MoreHeadUI.buttonMarkers.Values.FirstOrDefault(m => m.gameObject == __instance.gameObject);
+            // 确保实例有效
+            if (__instance == null)
+                return;
+
+            // 检查游戏对象是否有效
+            if (__instance.gameObject == null || !__instance.gameObject.activeInHierarchy)
+                return;
+                
+            // 安全查找按钮标记组件
+            DecorationButtonMarker? marker = null;
+            try
+            {
+                // 使用更安全的方式查找按钮标记
+                foreach (var m in MoreHeadUI.buttonMarkers.Values)
+                {
+                    if (m != null && m.gameObject != null && m.gameObject == __instance.gameObject)
+                    {
+                        marker = m;
+                        break;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // 查找失败则直接返回
+                return;
+            }
+
+            // 如果未找到匹配的标记或标记无效，则退出
             if (marker == null || marker.Decoration == null)
             {
                 return;
@@ -744,6 +801,9 @@ class MenuButtonHoverEndPatch
             // 使用decorationButtons获取按钮
             if (MoreHeadUI.decorationButtons.TryGetValue(decoration.Name ?? string.Empty, out var button))
             {
+                if (button == null || button.labelTMP == null)
+                    return;
+                    
                 // 移除模组名称部分
                 string currentText = button.labelTMP.text;
                 string modNamePart = $" <size=12><color=#AAAAAA>- {decoration.ModName}</color></size>";

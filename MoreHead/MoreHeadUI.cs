@@ -27,7 +27,7 @@ namespace MoreHead
         public static Dictionary<string?, REPOButton> decorationButtons = new();
         
         // 按钮Marker组件缓存
-        public static Dictionary<string?, DecorationButtonMarker> buttonMarkers = new();
+        public static Dictionary<string?, DecorationButtonMarker?> buttonMarkers = new();
         
         // 按标签分类的滚动视图元素字典
         private static Dictionary<string, List<REPOScrollViewElement>> tagScrollViewElements = new();
@@ -460,7 +460,7 @@ namespace MoreHead
                     
                     // 使用缓存的Marker组件
                     if (buttonMarkers.TryGetValue(decorationName ?? string.Empty, out var marker) && 
-                        marker.Decoration != null && 
+                        marker?.Decoration != null && 
                         !string.IsNullOrEmpty(marker.Decoration.ModName))
                     {
                         // 检查当前文本是否已经包含模组名称
@@ -722,8 +722,9 @@ namespace MoreHead
                 decorationDataCache.Clear();
                 buttonTextCache.Clear();
                 decorationButtons.Clear();
-                buttonMarkers.Clear(); // 清空Marker缓存
+                buttonMarkers.Clear();
                 tagScrollViewElements.Clear();
+                tagFilterButtons.Clear();
                 
                 // 销毁现有页面
                 if (decorationsPage != null && decorationsPage.gameObject != null)
@@ -753,6 +754,7 @@ namespace MoreHead
             {
                 // 清空现有数据
                 decorationButtons.Clear();
+                buttonMarkers.Clear();
                 tagScrollViewElements.Clear();
                 
                 // 为每个标签初始化元素列表
