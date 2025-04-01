@@ -1,3 +1,7 @@
+# v1.3.3
+* 修复了场景切换时可能出现的错误
+* Fixed potential errors when switching scenes
+
 # v1.3.2  
 * 悬停装饰品按钮时显示模组来源  
 * 点击当前标签页返回顶部（1.3.0 新增）  
