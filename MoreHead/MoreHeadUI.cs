@@ -21,7 +21,7 @@ namespace MoreHead
         private static ManualLogSource? Logger => Morehead.Logger;
         
         // UI元素
-        private static REPOPopupPage? decorationsPage;
+        public static REPOPopupPage? decorationsPage;
         
         // 装饰物按钮字典
         public static Dictionary<string?, REPOButton> decorationButtons = new();
@@ -626,7 +626,7 @@ namespace MoreHead
         }
         
         // 安全销毁头像预览
-        private static void SafeDestroyAvatar()
+        public static void SafeDestroyAvatar()
         {
             try
             {

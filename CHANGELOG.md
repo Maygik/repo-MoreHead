@@ -1,10 +1,12 @@
-# v1.3.4
-* 避免将版本号误认为是模组名称
-* Fixed version numbers being incorrectly identified as mod names
+# v1.3.4  
+* 修复了将版本号识别为模组名称的问题  
+* 修复打开改变颜色窗口时，出现多个模型重叠的问题  
+* Fixed version numbers being incorrectly identified as mod names  
+* Fixed the issue where multiple character models overlap when opening the color change window  
 
-# v1.3.3
-* 修复了场景切换时可能出现的错误
-* Fixed potential errors when switching scenes
+# v1.3.3  
+* 修复了退出场景时空引用的问题  
+* Fixed null reference issue when exiting a scene  
 
 # v1.3.2  
 * 悬停装饰品按钮时显示模组来源  

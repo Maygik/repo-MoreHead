@@ -45,6 +45,7 @@ public class Morehead : BaseUnityPlugin
             harmony.PatchAll(typeof(MenuManagerStartPatch));
             harmony.PatchAll(typeof(MenuButtonHoveringPatch));
             harmony.PatchAll(typeof(MenuButtonHoverEndPatch));
+            harmony.PatchAll(typeof(MenuPageStateSetPatch));
             
             string asciiArt = @$"
 
@@ -821,6 +822,36 @@ class MenuButtonHoverEndPatch
         catch (Exception e)
         {
             Morehead.Logger?.LogError($"MenuButton.OnHoverEnd补丁出错: {e.Message}\n{e.StackTrace}");
+        }
+    }
+}
+
+// 为MenuPage.PageStateSet添加补丁，捕获页面关闭事件
+[HarmonyPatch(typeof(MenuPage))]
+[HarmonyPatch("PageStateSet")]
+class MenuPageStateSetPatch
+{
+    [HarmonyPostfix]
+    static void Postfix(MenuPage __instance, MenuPage.PageState pageState)
+    {
+        try
+        {
+            // 当页面状态设置为Closing或Inactive时
+            if (pageState == MenuPage.PageState.Closing || pageState == MenuPage.PageState.Inactive)
+            {
+                // 如果存在装饰页面，且页面组件匹配
+                if (MoreHeadUI.decorationsPage != null && 
+                    __instance == MoreHeadUI.decorationsPage.menuPage)
+                {
+                    // Morehead.Logger?.LogInfo("检测到MoreHead页面关闭，销毁头像预览");
+                    // 销毁头像预览
+                    MoreHeadUI.SafeDestroyAvatar();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Morehead.Logger?.LogError($"MenuPage.PageStateSet补丁出错: {e.Message}\n{e.StackTrace}");
         }
     }
 }
