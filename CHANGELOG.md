@@ -1,10 +1,8 @@
-# v1.3.2
-* 增强了装饰品按钮悬停时显示模组来源功能
-* 支持DLL格式模组的装饰品正确显示来源
-* 点击当前标签页可返回列表顶部（1.3.0新增功能）
-* Enhanced display of mod source when hovering over decoration buttons
-* Added support for correctly showing the source of decorations from DLL format mods
-* Click on current tag to return to the top of the list (feature added in 1.3.0)
+# v1.3.2  
+* 悬停装饰品按钮时显示模组来源  
+* 点击当前标签页返回顶部（1.3.0 新增）  
+* Show mod source when hovering over decoration buttons  
+* Click the current tab to return to the top (added in 1.3.0)  
 
 # v1.3.1
 * 添加了一顶Nick'sHat，感谢nick制作的menulib模组，为社区带来便利
