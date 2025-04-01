@@ -709,21 +709,67 @@ namespace MoreHead
                 // 获取文件夹名称
                 string folderName = Path.GetFileName(directoryName);
                 
-                // 提取最后一个'-'后的内容作为模组名
-                string modName = folderName;
-                int lastDashIndex = folderName.LastIndexOf('-');
-                if (lastDashIndex >= 0 && lastDashIndex < folderName.Length - 1)
+                // 检查文件夹名称中的破折号
+                string[] parts = folderName.Split('-');
+                if (parts.Length <= 1)
                 {
-                    modName = folderName.Substring(lastDashIndex + 1);
+                    // 没有破折号，返回整个文件夹名
+                    return folderName;
                 }
                 
-                return modName;
+                // 检查最后一部分是否可能是版本号
+                string lastPart = parts[parts.Length - 1];
+                bool isLastPartVersion = IsLikelyVersionNumber(lastPart);
+                
+                if (isLastPartVersion && parts.Length > 2)
+                {
+                    // 如果最后一部分像是版本号，且有多个破折号，使用倒数第二个破折号后的部分作为模组名
+                    return parts[parts.Length - 2];
+                }
+                else if (isLastPartVersion)
+                {
+                    // 如果只有一个破折号且最后一部分是版本号，使用第一部分
+                    return parts[0];
+                }
+                else
+                {
+                    // 如果最后一部分不像是版本号，按原逻辑使用它作为模组名
+                    return lastPart;
+                }
             }
             catch (Exception e)
             {
                 Morehead.Logger?.LogError($"获取模组名称时出错: {e.Message}");
                 return null;
             }
+        }
+        
+        // 检查字符串是否可能是版本号
+        private static bool IsLikelyVersionNumber(string text)
+        {
+            // 版本号通常包含数字，且可能有点或其他分隔符
+            // 检查是否以数字开头
+            if (text.Length == 0 || !char.IsDigit(text[0]))
+                return false;
+                
+            // 检查是否包含常见版本号模式，如 1.0, v1.0, 1.0.0, 1.0.0.1 等
+            bool hasNumericPart = false;
+            bool hasSeparator = false;
+            
+            foreach (char c in text)
+            {
+                if (char.IsDigit(c))
+                {
+                    hasNumericPart = true;
+                }
+                else if (c == '.' || c == '_' || c == '-')
+                {
+                    hasSeparator = true;
+                }
+            }
+            
+            // 版本号通常有数字和分隔符
+            return hasNumericPart && hasSeparator;
         }
     }
 }

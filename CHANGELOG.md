@@ -1,3 +1,7 @@
+# v1.3.4
+* 避免将版本号误认为是模组名称
+* Fixed version numbers being incorrectly identified as mod names
+
 # v1.3.3
 * 修复了场景切换时可能出现的错误
 * Fixed potential errors when switching scenes
@@ -5,7 +9,7 @@
 # v1.3.2  
 * 悬停装饰品按钮时显示模组来源  
 * 点击当前标签页返回顶部（1.3.0 新增）  
-* Show mod source when hovering over decoration buttons  
+* Show mod names when hovering over decoration buttons  
 * Click the current tab to return to the top (added in 1.3.0)  
 
 # v1.3.1
