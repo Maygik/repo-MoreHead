@@ -115,7 +115,7 @@ Click to expand for detailed instructions.
    > <mark>⚠️ Note: Please avoid adding collider components to decoration models as they may affect character physics, causing rotation issues or unstable movements. For collision interactions, consider alternative techniques.</mark>
 
 7. **Run `Tools → Head Decorations Builder`**, drag your A prefab (or more, batch export is supported) into the script panel, and select the corresponding part from step 3, then **click `Add Model to List`**.  
-   > <mark>Make sure to select the correct body part (head/neck/body/hip/world) that matches where you placed your decoration.</mark>
+   > <mark>Make sure to select the correct body part (head/neck/body/hip, etc.) that matches where you placed your decoration.</mark>
 
 8. **Click `Build All AssetBundle`**, then locate the `[your decoration name].hhh` file in the `AssetBundles` folder.  
    > <mark>Only the `.hhh` file is needed for installation. Other generated files can be ignored.</mark>
@@ -162,7 +162,7 @@ Click to expand for detailed instructions.
    > <mark>⚠️ 提示：装饰模型上请勿添加碰撞体组件。碰撞体可能影响角色物理行为，导致旋转异常或动作不稳定。如需碰撞交互，请考虑使用其他技术实现。</mark>
 
 7. **运行`Tools → Head Decorations Builder`**，拖入A预制体（或更多，支持批量导出），并选择第3步中对应的部位，随后**点击`Add Model to List`**。  
-   > <mark>确保选择正确的身体部位（头部/颈部/身体/臀部/世界空间），与您放置装饰的位置相匹配。</mark>
+   > <mark>确保选择正确的身体部位（头部/颈部/身体/臀部等），与您放置装饰的位置相匹配。</mark>
 
 8. **点击`Build All AssetBundle`**，然后在`AssetBundles`文件夹中找到`[你的装饰品名].hhh`文件。  
    > <mark>安装时只需要`.hhh`文件，其他生成的文件可以忽略。</mark>
