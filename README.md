@@ -82,8 +82,8 @@ Click to expand for detailed instructions.
 
 ## English Tutorial
 
-1. **Set up Unity** (2022.3\* recommended, the game uses built-in render pipeline, please pay attention to the corresponding model materials), import `MoreHead-Asset-Pack_v1.1.unitypackage`.  
-   > **📥 [Download unitypackage](https://github.com/Masaicker/repo-MoreHead/releases/download/v1.1/MoreHead-Asset-Pack_v1.1.unitypackage)**
+1. **Set up Unity** (2022.3\* recommended, the game uses built-in render pipeline, please pay attention to the corresponding model materials), import `MoreHead-Asset-Pack_v1.3.unitypackage`.  
+   > **📥 [Download unitypackage](https://github.com/Masaicker/repo-MoreHead/releases/download/v1.3/MoreHead-Asset-Pack_v1.3.unitypackage)**
 
 2. **Import your model** and **drag `PlayerAvatar` prefab into the scene**.  
    > <mark>Make sure your model is compatible with Unity and properly rigged if animated.</mark>
@@ -96,10 +96,15 @@ Click to expand for detailed instructions.
     | **Neck decoration (Do Not Move)** | Chin/chest area | `neck` |
     | **Body decoration (Do Not Move)** | Body | `body` |
     | **Hip decoration (Do Not Move)** | Hip/lower body area | `hip` |
+    | **L-ARM decoration (Do Not Move)** | Left arm | `leftarm` |
+    | **R-ARM decoration (Do Not Move)** | Right arm | `rightarm` |
+    | **L-LEG decoration (Do Not Move)** | Left leg | `leftleg` |
+    | **R-LEG decoration (Do Not Move)** | Right leg | `rightleg` |
     | **World decoration (Do Not Move)** | Follows character position but maintains horizontal orientation | `world` |
 
     > <mark>⚠️ These positions are anchor references. DO NOT modify coordinates, or your model will be misaligned in-game.</mark><br>
-    > <mark>💡 The `world` tag is useful for decorations that should maintain their horizontal orientation regardless of character movement.</mark>
+    > <mark>💡 The `world` tag is useful for decorations that should maintain their horizontal orientation regardless of character movement.</mark><br>
+    > <mark>💡 Limb-related tags (leftarm, rightarm, leftleg, rightleg) can be viewed together in-game under the "LIMBS" main tag.</mark>
 
 4. **Create an empty object under the target part (referred to as A) and name it**.  
    > <mark>This name will be displayed in-game as your decoration's name.</mark>
@@ -107,9 +112,10 @@ Click to expand for detailed instructions.
 5. **Place your model inside A and adjust to a suitable position**.  
 
 6. **Drag A to the `Project` window to create a prefab**.
+   > <mark>⚠️ Note: Please avoid adding collider components to decoration models as they may affect character physics, causing rotation issues or unstable movements. For collision interactions, consider alternative techniques.</mark>
 
 7. **Run `Tools → Head Decorations Builder`**, drag your A prefab (or more, batch export is supported) into the script panel, and select the corresponding part from step 3, then **click `Add Model to List`**.  
-   > <mark>Make sure to select the correct body part (head/neck/body/world) that matches where you placed your decoration.</mark>
+   > <mark>Make sure to select the correct body part (head/neck/body/hip/world) that matches where you placed your decoration.</mark>
 
 8. **Click `Build All AssetBundle`**, then locate the `[your decoration name].hhh` file in the `AssetBundles` folder.  
    > <mark>Only the `.hhh` file is needed for installation. Other generated files can be ignored.</mark>
@@ -123,8 +129,8 @@ Click to expand for detailed instructions.
 
 ## 中文教程
 
-1. **部署 Unity**（推荐 2022.3\* 版本，游戏使用的是内置渲染管线，请注意对应的模型材质），导入 `MoreHead-Asset-Pack_v1.1.unitypackage`。  
-   > **📥 [下载 unitypackage](https://github.com/Masaicker/repo-MoreHead/releases/download/v1.1/MoreHead-Asset-Pack_v1.1.unitypackage)**
+1. **部署 Unity**（推荐 2022.3\* 版本，游戏使用的是内置渲染管线，请注意对应的模型材质），导入 `MoreHead-Asset-Pack_v1.3.unitypackage`。  
+   > **📥 [下载 unitypackage](https://github.com/Masaicker/repo-MoreHead/releases/download/v1.3/MoreHead-Asset-Pack_v1.3.unitypackage)**
 
 2. **导入模型，并将 `PlayerAvatar` 预制体拖入场景**。  
    > <mark>确保您的模型与Unity兼容，如果有动画需要正确绑定骨骼。</mark>
@@ -137,10 +143,15 @@ Click to expand for detailed instructions.
     | **Neck decoration (Do Not Move)** | 下巴/胸口 | `neck` |
     | **Body decoration (Do Not Move)** | 身体 | `body` |
     | **Hip decoration (Do Not Move)** | 臀部/下半身 | `hip` |
+    | **L-ARM decoration (Do Not Move)** | 左手臂 | `leftarm` |
+    | **R-ARM decoration (Do Not Move)** | 右手臂 | `rightarm` |
+    | **L-LEG decoration (Do Not Move)** | 左腿 | `leftleg` |
+    | **R-LEG decoration (Do Not Move)** | 右腿 | `rightleg` |
     | **World decoration (Do Not Move)** | 跟随角色位置移动但保持水平方向 | `world` |
 
     > <mark>⚠️ 这些位置是坐标锚点参考。请勿修改坐标，否则您的模型在游戏中会错位。</mark><br>
-    > <mark>💡 `world` 标签适用于需要保持水平方向的装饰品，无论角色如何移动。</mark>
+    > <mark>💡 `world` 标签适用于需要保持水平方向的装饰品，无论角色如何移动。</mark><br>
+    > <mark>💡 四肢相关标签（leftarm、rightarm、leftleg、rightleg）可在游戏中通过"LIMBS"主标签统一查看。</mark>
 
 4. **在目标部位下创建一个空对象（称为A），并命名**。  
    > <mark>此名称将在游戏中显示为您的装饰品名称。</mark>
@@ -148,9 +159,10 @@ Click to expand for detailed instructions.
 5. **将模型放入A，并调整到合适位置**。  
 
 6. **拖动A到`Project`窗口，创建预制体**。
+   > <mark>⚠️ 提示：装饰模型上请勿添加碰撞体组件。碰撞体可能影响角色物理行为，导致旋转异常或动作不稳定。如需碰撞交互，请考虑使用其他技术实现。</mark>
 
 7. **运行`Tools → Head Decorations Builder`**，拖入A预制体（或更多，支持批量导出），并选择第3步中对应的部位，随后**点击`Add Model to List`**。  
-   > <mark>确保选择正确的身体部位（头部/颈部/身体/世界空间），与您放置装饰的位置相匹配。</mark>
+   > <mark>确保选择正确的身体部位（头部/颈部/身体/臀部/世界空间），与您放置装饰的位置相匹配。</mark>
 
 8. **点击`Build All AssetBundle`**，然后在`AssetBundles`文件夹中找到`[你的装饰品名].hhh`文件。  
    > <mark>安装时只需要`.hhh`文件，其他生成的文件可以忽略。</mark>

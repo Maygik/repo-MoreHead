@@ -49,6 +49,10 @@ namespace MoreHead
             { "neck", "[RIG]/code_lean/code_tilt/ANIM BOT/_____________________________________/ANIM BODY BOT/_____________________________________/ANIM BODY TOP/code_body_top_up/code_body_top_side/_____________________________________/ANIM HEAD BOT/code_head_bot_up/code_head_bot_side" },
             { "body", "[RIG]/code_lean/code_tilt/ANIM BOT/_____________________________________/ANIM BODY BOT/_____________________________________/ANIM BODY TOP/code_body_top_up/code_body_top_side/ANIM BODY TOP SCALE" },
             { "hip", "[RIG]/code_lean/code_tilt/ANIM BOT/_____________________________________/ANIM BODY BOT" },
+            { "leftarm", "[RIG]/code_lean/code_tilt/ANIM BOT/_____________________________________/ANIM BODY BOT/_____________________________________/ANIM BODY TOP/code_body_top_up/code_body_top_side/_____________________________________/ANIM ARM L/code_arm_l" },
+            { "rightarm", "[RIG]/code_lean/code_tilt/ANIM BOT/_____________________________________/ANIM BODY BOT/_____________________________________/ANIM BODY TOP/code_body_top_up/code_body_top_side/_____________________________________/ANIM ARM R/code_arm_r_parent/code_arm_r/ANIM ARM R SCALE" },
+            { "leftleg", "[RIG]/code_lean/code_tilt/ANIM BOT/code_leg_twist/_____________________________________/ANIM LEG L BOT/_____________________________________/ANIM LEG L TOP" },
+            { "rightleg", "[RIG]/code_lean/code_tilt/ANIM BOT/code_leg_twist/_____________________________________/ANIM LEG R BOT/_____________________________________/ANIM LEG R TOP" },
             { "world", "" } // 世界空间节点路径（根目录，避免角色翻滚动画影响）
         };
         

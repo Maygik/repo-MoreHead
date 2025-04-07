@@ -1,3 +1,9 @@
+# v1.3.5
+* 添加 "LIMBS" 主标签，支持手脚部位装饰品的统一管理
+* 提供对应 v1.3 的 UnityPackage，支持直接配置 limb 标签
+* Added "LIMBS" main tag for unified management of arm and leg cosmetics
+* Provided v1.3-compatible UnityPackage with direct support for limb tags
+
 # v1.3.4  
 * 修复了将版本号识别为模组名称的问题  
 * 修复打开改变颜色窗口时，出现多个模型重叠的问题  

@@ -50,7 +50,13 @@ namespace MoreHead
         private static readonly string PAGE_TITLE = $"Rotate robot: A/D <size=12><color=#AAAAAA>v{Morehead.GetPluginVersion()}</color></size>";
         
         // 所有可用标签
-        private static readonly string[] ALL_TAGS = { "ALL", "HEAD", "NECK", "BODY", "HIP", "WORLD" };
+        private static readonly string[] ALL_TAGS = { "ALL", "HEAD", "NECK", "BODY", "HIP", "LIMBS", "WORLD" };
+        
+        // 完整的标签列表（包含四肢分类）
+        private static readonly string[] FULL_TAGS = { "ALL", "HEAD", "NECK", "BODY", "HIP", "LEFTARM", "RIGHTARM", "LEFTLEG", "RIGHTLEG", "WORLD" };
+        
+        // 四肢标签
+        private static readonly string[] LIMB_TAGS = { "LEFTARM", "RIGHTARM", "LEFTLEG", "RIGHTLEG" };
 
         // 初始化UI
         public static void Initialize()
@@ -85,10 +91,22 @@ namespace MoreHead
                 // 为每个标签创建数据缓存
                 foreach (string tag in ALL_TAGS)
                 {
-                    // 筛选出属于该标签的装饰物
-                    var filteredDecorations = HeadDecorationManager.Decorations
-                        .Where(decoration => tag == "ALL" || (decoration.ParentTag?.ToLower() == tag.ToLower()))
-                        .ToList();
+                    List<DecorationInfo> filteredDecorations;
+                    
+                    if (tag == "LIMBS")
+                    {
+                        // 特殊处理LIMBS标签，包含所有四肢的装饰物
+                        filteredDecorations = HeadDecorationManager.Decorations
+                            .Where(decoration => LIMB_TAGS.Contains(decoration.ParentTag?.ToUpper()))
+                            .ToList();
+                    }
+                    else
+                    {
+                        // 筛选出属于该标签的装饰物
+                        filteredDecorations = HeadDecorationManager.Decorations
+                            .Where(decoration => tag == "ALL" || (decoration.ParentTag?.ToUpper() == tag))
+                            .ToList();
+                    }
                     
                     // 添加到缓存
                     decorationDataCache[tag] = filteredDecorations;
@@ -250,9 +268,9 @@ namespace MoreHead
                 tagFilterButtons.Clear();
                 
                 // 标签按钮的水平间距
-                const int buttonSpacing = 40; // 减小间距，使按钮靠近一点
+                const int buttonSpacing = 35; // 减小间距，使按钮靠近一点
                 // 起始X坐标
-                const int startX = 70;
+                const int startX = 50;
                 // Y坐标
                 const int y = 20; // 向上移动，避免与其他按钮重叠
                 
@@ -270,6 +288,7 @@ namespace MoreHead
                         "neck" => "#AA00FF", // 紫色
                         "body" => "#FFAA00", // 橙色
                         "hip" => "#FF00AA", // 粉色
+                        "limbs" => "#AACCAA", // 淡绿色（四肢页面）
                         "world" => "#00FFAA", // 青色
                         _ => "#FFFFFF"       // 白色（ALL标签）
                     };
@@ -354,6 +373,15 @@ namespace MoreHead
                             if (buttonTextCache.TryGetValue(currentTagFilter, out var textCache) && 
                                 textCache.TryGetValue(decoration.Name ?? string.Empty, out buttonText))
                             {
+                                // 如果是LIMBS标签，确保按钮文本反映了当前状态
+                                if (currentTagFilter == "LIMBS")
+                                {
+                                    // 重新计算按钮文本，确保反映当前状态
+                                    buttonText = GetButtonText(decoration, decoration.IsVisible);
+                                    
+                                    // 更新缓存
+                                    textCache[decoration.Name ?? string.Empty] = buttonText;
+                                }
                                 // 使用缓存的按钮文本
                             }
                             else
@@ -402,6 +430,7 @@ namespace MoreHead
                             "neck" => "#AA00FF", // 紫色
                             "body" => "#FFAA00", // 橙色
                             "hip" => "#FF00AA", // 粉色
+                            "limbs" => "#AACCAA", // 淡绿色（四肢页面）
                             "world" => "#00FFAA", // 青色
                             _ => "#FFFFFF"       // 白色（ALL标签）
                         };
@@ -443,8 +472,20 @@ namespace MoreHead
                 // 更新所有标签的按钮文本缓存
                 foreach (string tag in ALL_TAGS)
                 {
-                    bool shouldShow = tag == "ALL" || 
-                                     (decoration.ParentTag?.ToLower() == tag.ToLower());
+                    bool shouldShow = false;
+                    
+                    if (tag == "ALL")
+                    {
+                        shouldShow = true;
+                    }
+                    else if (tag == "LIMBS" && LIMB_TAGS.Contains(decoration.ParentTag?.ToUpper()))
+                    {
+                        shouldShow = true;
+                    }
+                    else if (decoration.ParentTag?.ToUpper() == tag)
+                    {
+                        shouldShow = true;
+                    }
                     
                     if (shouldShow && buttonTextCache.TryGetValue(tag, out var textCache))
                     {
@@ -498,12 +539,35 @@ namespace MoreHead
                 "neck" => "#AA00FF", // 紫色
                 "body" => "#FFAA00", // 橙色
                 "hip" => "#FF00AA", // 粉色
+                "leftarm" => "#88CC88", // 淡绿色（手臂）
+                "rightarm" => "#88CC88", // 淡绿色（手臂）
+                "leftleg" => "#88BBEE", // 淡蓝色（腿部）
+                "rightleg" => "#88BBEE", // 淡蓝色（腿部）
                 "world" => "#00FFAA", // 青色
                 _ => "#AAAAAA"       // 灰色（未知标签）
             };
             
+            // 构建子标签显示（用于四肢标签下显示具体是哪个肢体）
+            string subTagDisplay = "";
+            if (LIMB_TAGS.Contains(parentTag.ToUpper()))
+            {
+                string subTagText = parentTag.ToLower() switch
+                {
+                    "leftarm" => "L-ARM",
+                    "rightarm" => "R-ARM",
+                    "leftleg" => "L-LEG",
+                    "rightleg" => "R-LEG",
+                    _ => parentTag
+                };
+                subTagDisplay = $"<color={tagColor}><size=12>({subTagText})</size></color> ";
+            }
+            else
+            {
+                subTagDisplay = $"<color={tagColor}><size=12>({parentTag})</size></color> ";
+            }
+            
             // 返回格式化的按钮文本
-            return $"<size=16>{(isEnabled ? "<color=#00FF00>[+]</color>" : "<color=#FF0000>[-]</color>")} <color={tagColor}><size=12>({parentTag})</size></color> {name}</size>";
+            return $"<size=16>{(isEnabled ? "<color=#00FF00>[+]</color>" : "<color=#FF0000>[-]</color>")} {subTagDisplay}{name}</size>";
         }
         
         // 关闭按钮点击事件
@@ -678,8 +742,20 @@ namespace MoreHead
                     {
                         foreach (var decoration in HeadDecorationManager.Decorations)
                         {
-                            bool shouldShow = tag == "ALL" || 
-                                            (decoration.ParentTag?.ToLower() == tag.ToLower());
+                            bool shouldShow = false;
+                            
+                            if (tag == "ALL")
+                            {
+                                shouldShow = true;
+                            }
+                            else if (tag == "LIMBS" && LIMB_TAGS.Contains(decoration.ParentTag?.ToUpper()))
+                            {
+                                shouldShow = true;
+                            }
+                            else if (decoration.ParentTag?.ToUpper() == tag)
+                            {
+                                shouldShow = true;
+                            }
                             
                             if (shouldShow)
                             {
@@ -817,7 +893,22 @@ namespace MoreHead
                 // 更新按钮文本缓存
                 foreach (string tag in ALL_TAGS)
                 {
-                    if (tag == "ALL" || parentTag.ToLower() == tag.ToLower())
+                    bool shouldCache = false;
+                    
+                    if (tag == "ALL")
+                    {
+                        shouldCache = true;
+                    }
+                    else if (tag == "LIMBS" && LIMB_TAGS.Contains(parentTag.ToUpper()))
+                    {
+                        shouldCache = true;
+                    }
+                    else if (parentTag.ToUpper() == tag)
+                    {
+                        shouldCache = true;
+                    }
+                    
+                    if (shouldCache)
                     {
                         // 确保缓存存在
                         if (!buttonTextCache.TryGetValue(tag, out var textCache))
@@ -860,8 +951,14 @@ namespace MoreHead
                     // 将按钮添加到对应的标签分类中
                     tagScrollViewElements["ALL"].Add(repoButton.repoScrollViewElement);
                     
+                    // 处理四肢装饰物的特殊情况
+                    if (LIMB_TAGS.Contains(parentTag.ToUpper()))
+                    {
+                        // 同时添加到LIMBS标签分类
+                        tagScrollViewElements["LIMBS"].Add(repoButton.repoScrollViewElement);
+                    }
                     // 同时添加到父标签分类
-                    if (tagScrollViewElements.TryGetValue(parentTag.ToUpper(), out var elements))
+                    else if (tagScrollViewElements.TryGetValue(parentTag.ToUpper(), out var elements))
                     {
                         elements.Add(repoButton.repoScrollViewElement);
                     }
