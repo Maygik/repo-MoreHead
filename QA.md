@@ -8,3 +8,8 @@ Make sure all players have the same version of MoreHead installed. If someone ha
 
 ## 3. What should I do if MoreHead shows an error at startup?
 MoreHead relies on the MenuLib library. If MenuLib is updated, it might cause errors. Please roll back the MenuLib version, and MoreHead will be updated later to support the latest version of MenuLib.
+
+## 4.Why does the game throw errors or behave strangely when using certain mods alongside MoreHead?
+Some extension mods may accidentally include an older version of `MoreHead.dll` in their package. This can lead to conflicts during loading and result in bugs or crashes. Try checking the mod contents—if you find a bundled `MoreHead.dll`, try removing it or contacting the mod creator.
+
+
