@@ -67,7 +67,14 @@ namespace MoreHead
             try
             {
                 // 创建ESC菜单按钮
-                MenuAPI.AddElementToEscapeMenu(parent => {
+                MenuAPI.AddElementToEscapeMenu(parent =>
+                {
+                    MenuAPI.CreateREPOButton(BUTTON_NAME, OnMenuButtonClick, parent, Vector2.zero);
+                });
+                
+                // 创建大厅按钮
+                MenuAPI.AddElementToLobbyMenu(parent =>
+                {
                     MenuAPI.CreateREPOButton(BUTTON_NAME, OnMenuButtonClick, parent, Vector2.zero);
                 });
                 
@@ -138,8 +145,12 @@ namespace MoreHead
         {
             try
             {
-                // 先关闭所有现有UI，包括ESC菜单
-                MenuManager.instance.PageCloseAll();
+                // 检查是否有ESC菜单打开，如果有则只关闭ESC菜单
+                if (MenuPageEsc.instance != null)
+                {
+                    // 调用ESC菜单的继续按钮功能来关闭菜单
+                    MenuPageEsc.instance.ButtonEventContinue();
+                }
                 
                 // 添加延迟确保所有UI已关闭
                 UnityEngine.MonoBehaviour.FindObjectOfType<MonoBehaviour>()?.StartCoroutine(
@@ -580,8 +591,7 @@ namespace MoreHead
         {
             try
             {
-                // 关闭所有页面，直接返回游戏
-                MenuManager.instance.PageCloseAll();
+                decorationsPage?.ClosePage(true);
             }
             catch (Exception e)
             {

@@ -60,15 +60,19 @@ For the best experience and stability, we recommend always using the latest vers
 
 # How to Use 如何使用
 
-1. **Install this mod** and enter any game match.
-2. **Press `ESC` > Find "MoreHead" in the bottom left** > Click to switch components.
+1. **Install this mod** and enter the game.
+2. You can find the **"MoreHead" button in the bottom left corner** either **in the lobby** or **after entering a level** (press `ESC`).
+3. Click the button to switch cosmetics.
 
 <br>
 
-1. **安装本模组**，进入游戏战局。
-2. **按 `ESC` > 在左下角找到 "MoreHead"** > 点击切换部件。
+1. **安装本模组**，进入游戏。
+2. **在大厅准备阶段** 或 **正式进入关卡后按 `ESC`**，都能在左下角找到 **"MoreHead" 按钮**。
+3. 点击按钮切换化妆品。
 
-<br>![](https://i.imgur.com/K7alfF4.png)
+<br>![](https://i.imgur.com/Wp7ZedO.jpeg)  
+<br>![](https://i.imgur.com/u4v7esZ.jpeg)  
+<br>![](https://i.imgur.com/bKOSgHq.jpeg)
 
 <br><br>
 

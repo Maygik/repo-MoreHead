@@ -1,3 +1,7 @@
+# v1.3.8
+* 在游戏大厅添加了MoreHead按钮
+* Added MoreHead button to the lobby
+
 # v1.3.7
 * 新增：在界面右侧添加五个快速换装按钮，并支持使用Ctrl+1到Ctrl+5快捷键在游戏中随时切换装备方案
 * Added five quick switching buttons on the right side of the interface and keyboard shortcuts (Ctrl+1 to Ctrl+5) for switching outfits anytime during gameplay
