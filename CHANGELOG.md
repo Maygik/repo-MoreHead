@@ -1,3 +1,7 @@
+# v1.3.9
+* 将装备方案切换快捷键从Ctrl+1-5改为F1-F5
+* Changed outfit switching shortcuts from Ctrl+1-5 to F1-F5
+
 # v1.3.8
 * 在游戏大厅添加了MoreHead按钮
 * Added MoreHead button to the lobby

@@ -1105,7 +1105,7 @@ namespace MoreHead
                     int outfitIndex = i; // 捕获循环变量
                     
                     // 添加快捷键信息到按钮文本
-                    string shortcutInfo = $"<size=10><color=#888888>[Ctrl+{outfitIndex}]</color></size>";
+                    string shortcutInfo = $"<size=10><color=#888888>[F{outfitIndex}]</color></size>";
                     
                     // 如果是当前选中的方案，则使用加粗效果
                     string buttonText = outfitIndex == currentOutfit ?
@@ -1180,7 +1180,7 @@ namespace MoreHead
                     if (outfitButtons.TryGetValue(i, out REPOButton button))
                     {
                         // 添加快捷键信息到按钮文本
-                        string shortcutInfo = $"<size=10><color=#888888>[Ctrl+{i}]</color></size>";
+                        string shortcutInfo = $"<size=10><color=#888888>[F{i}]</color></size>";
                         
                         // 如果是当前选中的方案，则使用加粗效果
                         string buttonText = i == currentOutfit ?
@@ -1226,19 +1226,16 @@ namespace MoreHead
             
             private void Update()
             {
-                // 检测Ctrl+1至Ctrl+5组合键
-                if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                // 检测F1至F5功能键
+                for (int i = 1; i <= 5; i++)
                 {
-                    for (int i = 1; i <= 5; i++)
+                    // 根据索引确定功能键
+                    KeyCode fKey = (KeyCode)((int)KeyCode.F1 + (i - 1));
+                    
+                    if (Input.GetKeyDown(fKey))
                     {
-                        // 根据按下的数字键确定装备方案索引
-                        KeyCode numKey = (KeyCode)((int)KeyCode.Alpha1 + (i - 1));
-                        
-                        if (Input.GetKeyDown(numKey))
-                        {
-                            // 调用切换装备方案函数
-                            SwitchOutfitWithShortcut(i);
-                        }
+                        // 调用切换装备方案函数
+                        SwitchOutfitWithShortcut(i);
                     }
                 }
             }
