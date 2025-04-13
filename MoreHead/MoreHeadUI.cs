@@ -1094,10 +1094,13 @@ namespace MoreHead
                 {
                     int outfitIndex = i; // 捕获循环变量
                     
+                    // 添加快捷键信息到按钮文本
+                    string shortcutInfo = $"<size=10><color=#888888>[Ctrl+{outfitIndex}]</color></size>";
+                    
                     // 如果是当前选中的方案，则使用加粗效果
                     string buttonText = outfitIndex == currentOutfit ?
-                        $"<size=14><color=#FFCC00><b>{outfitIndex}</b></color></size>" :
-                        $"<size=14><color=#CCCCCC>{outfitIndex}</color></size>";
+                        $"<size=14><color=#FFCC00><b>{outfitIndex}</b></color></size> {shortcutInfo}" :
+                        $"<size=14><color=#CCCCCC>{outfitIndex}</color></size> {shortcutInfo}";
                     
                     // 计算按钮位置 - 垂直排列，从上到下
                     int yPosition = startY - (i - 1) * buttonSpacing;
@@ -1166,10 +1169,13 @@ namespace MoreHead
                 {
                     if (outfitButtons.TryGetValue(i, out REPOButton button))
                     {
+                        // 添加快捷键信息到按钮文本
+                        string shortcutInfo = $"<size=10><color=#888888>[Ctrl+{i}]</color></size>";
+                        
                         // 如果是当前选中的方案，则使用加粗效果
                         string buttonText = i == currentOutfit ?
-                            $"<size=14><color=#FFCC00><b>{i}</b></color></size>" :
-                            $"<size=14><color=#CCCCCC>{i}</color></size>";
+                            $"<size=14><color=#FFCC00><b>{i}</b></color></size> {shortcutInfo}" :
+                            $"<size=14><color=#CCCCCC>{i}</color></size> {shortcutInfo}";
                         
                         button.labelTMP.text = buttonText;
                     }
@@ -1178,6 +1184,105 @@ namespace MoreHead
             catch (Exception e)
             {
                 Logger?.LogError($"更新装备方案按钮高亮状态时出错: {e.Message}");
+            }
+        }
+        
+        // 检测快捷键组件
+        private class ShortcutKeyListener : MonoBehaviour
+        {
+            // 静态单例实例
+            public static ShortcutKeyListener? Instance { get; private set; }
+            
+            private void Awake()
+            {
+                // 单例模式实现
+                if (Instance != null && Instance != this)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+                
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
+            
+            private void OnDestroy()
+            {
+                if (Instance == this)
+                {
+                    Instance = null;
+                }
+            }
+            
+            private void Update()
+            {
+                // 检测Ctrl+1至Ctrl+5组合键
+                if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                {
+                    for (int i = 1; i <= 5; i++)
+                    {
+                        // 根据按下的数字键确定装备方案索引
+                        KeyCode numKey = (KeyCode)((int)KeyCode.Alpha1 + (i - 1));
+                        
+                        if (Input.GetKeyDown(numKey))
+                        {
+                            // 调用切换装备方案函数
+                            SwitchOutfitWithShortcut(i);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 通过快捷键切换装备方案
+        private static void SwitchOutfitWithShortcut(int outfitIndex)
+        {
+            try
+            {
+                // 如果当前已经是该方案，不做切换
+                int currentOutfit = ConfigManager.GetCurrentOutfitIndex();
+                if (outfitIndex == currentOutfit)
+                    return;
+                    
+                // 切换到新的装备方案
+                ConfigManager.SwitchOutfit(outfitIndex);
+                
+                // 如果MoreHead页面已打开，更新UI显示
+                if (decorationsPage != null && decorationsPage.menuPage.isActiveAndEnabled)
+                {
+                    // 更新装备方案按钮高亮状态
+                    UpdateOutfitButtonHighlights();
+                    
+                    // 更新按钮状态
+                    UpdateButtonStates();
+                }
+                
+                // 更新所有装饰物状态 - 不论页面是否打开都执行
+                UpdateDecorations();
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"通过快捷键切换装备方案时出错: {e.Message}");
+            }
+        }
+        
+        // 创建按键监听器实例
+        public static void InitializeShortcutListener()
+        {
+            try
+            {
+                // 检查单例是否已存在
+                if (ShortcutKeyListener.Instance == null)
+                {
+                    // 创建持久性游戏对象
+                    GameObject listenerObject = new GameObject("MoreHeadShortcutListener");
+                    listenerObject.AddComponent<ShortcutKeyListener>();
+                    Logger?.LogInfo("已初始化装备方案快捷键监听器");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"初始化快捷键监听器时出错: {e.Message}");
             }
         }
     }

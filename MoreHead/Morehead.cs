@@ -103,6 +103,9 @@ class MenuManagerStartPatch
                 // Morehead.Logger?.LogInfo("MenuManager已初始化，正在初始化MoreHeadUI...");
                 // 初始化UI
                 MoreHeadUI.Initialize();
+                
+                // 初始化快捷键监听器
+                MoreHeadUI.InitializeShortcutListener();
             }
             else
             {
