@@ -5,6 +5,7 @@ using System.Linq;
 using BepInEx.Logging;
 using UnityEngine;
 using System.Reflection;
+using BepInEx.Configuration;
 
 namespace MoreHead
 {
@@ -39,6 +40,9 @@ namespace MoreHead
         // 日志记录器
         private static ManualLogSource? Logger => Morehead.Logger;
         
+        // 日志控制配置选项
+        private static ConfigEntry<bool>? _enableVerboseLogging;
+        
         // 装饰物列表
         public static List<DecorationInfo> Decorations { get; private set; } = new List<DecorationInfo>();
         
@@ -64,6 +68,14 @@ namespace MoreHead
         {
             try
             {
+                // 初始化配置选项
+                _enableVerboseLogging = Morehead.Instance?.Config.Bind(
+                    "Logging",
+                    "EnableVerboseLogging",
+                    true,
+                    "启用模型加载日志（默认开启） Enable model loading logs (default: on)"
+                );
+                
                 Logger?.LogInfo("正在初始化装饰物管理器...");
                 
                 // 清空装饰物列表
@@ -311,7 +323,10 @@ namespace MoreHead
                     
                     // 添加到装饰物列表
                     Decorations.Add(decoration);
-                    Logger?.LogInfo($"成功加载装饰物: {decoration.DisplayName}, 标签: {decoration.ParentTag}");
+                    if (_enableVerboseLogging?.Value ?? true)
+                    {
+                        Logger?.LogInfo($"成功加载装饰物: {decoration.DisplayName}, 标签: {decoration.ParentTag}");
+                    }
                     
                     // 卸载AssetBundle但保留已加载的资源
                     assetBundle.Unload(false);

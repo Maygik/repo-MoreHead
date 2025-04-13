@@ -1,3 +1,9 @@
+# v1.3.6
+* 添加模型日志配置选项（默认开启）
+* 优化标签按钮布局与间距
+* Added model logging config option (enabled by default)
+* Improved tag button layout and spacing
+
 # v1.3.5
 * 添加 "LIMBS" 主标签，支持手脚部位装饰品的统一管理
 * 提供对应 v1.3 的 UnityPackage，支持直接配置四肢相关子标签（leftarm, rightarm, leftleg, rightleg）

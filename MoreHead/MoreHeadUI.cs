@@ -295,8 +295,8 @@ namespace MoreHead
                     
                     // 如果是当前选中的标签，则使用更亮的颜色和加粗效果
                     string buttonText = lowerTag == currentTagFilter.ToLower() ?
-                        $"<size=14><b><color={tagColor}>{tag}</color></b></size>" :
-                        $"<size=14><color={tagColor}50>{tag}</color></size>";
+                        $"<size=13><u><color={tagColor}>{tag}</color></u></size>" :
+                        $"<size=13><color={tagColor}50>{tag}</color></size>";
                     
                     // 创建按钮 - 确保标签大小写一致
                     string tagForCallback = lowerTag == "all" ? "ALL" : tag;
@@ -437,8 +437,8 @@ namespace MoreHead
                         
                         // 如果是当前选中的标签，则使用更亮的颜色和加粗效果
                         string buttonText = tagKey == currentTagFilter ?
-                            $"<size=14><b><color={tagColor}>{tag}</color></b></size>" :
-                            $"<size=14><color={tagColor}50>{tag}</color></size>";
+                            $"<size=13><u><color={tagColor}>{tag}</color></u></size>" :
+                            $"<size=13><color={tagColor}50>{tag}</color></size>";
                         
                         button.labelTMP.text = buttonText;
                     }
