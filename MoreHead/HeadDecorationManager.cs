@@ -134,7 +134,7 @@ namespace MoreHead
                         string[] pluginsBundleFiles = Directory.GetFiles(pluginsDirectory, "*.hhh", SearchOption.AllDirectories);
                         allBundleFiles.AddRange(pluginsBundleFiles);
                         
-                        Logger?.LogInfo($"在plugins目录中找到 {pluginsBundleFiles.Length} 个.hhh文件");
+                        // Logger?.LogInfo($"在plugins目录中找到 {pluginsBundleFiles.Length} 个.hhh文件");
                     }
                     else
                     {
@@ -153,14 +153,14 @@ namespace MoreHead
                 {
                     Logger?.LogWarning("未找到任何装饰物包文件，请确保.hhh文件已放置");
                 }
-                else
-                {
-                    Logger?.LogInfo($"找到 {allBundleFiles.Count} 个装饰物包文件");
+                //else
+                //{
+                    // Logger?.LogInfo($"找到 {allBundleFiles.Count} 个装饰物包文件");
                     
                     // 记录文件位置的详细信息
-                    if (decorationsBundleFiles.Length > 0)
-                        Logger?.LogInfo($"- Decorations目录: {decorationsBundleFiles.Length} 个文件");
-                }
+                    // if (decorationsBundleFiles.Length > 0)
+                    //    Logger?.LogInfo($"- Decorations目录: {decorationsBundleFiles.Length} 个文件");
+                //}
                 
                 // 加载每个装饰物包
                 foreach (string bundlePath in allBundleFiles)

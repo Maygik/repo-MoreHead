@@ -58,6 +58,9 @@ namespace MoreHead
         // 四肢标签
         private static readonly string[] LIMB_TAGS = { "LEFTARM", "RIGHTARM", "LEFTLEG", "RIGHTLEG" };
 
+        // 装备方案按钮字典
+        private static Dictionary<int, REPOButton> outfitButtons = new Dictionary<int, REPOButton>();
+
         // 初始化UI
         public static void Initialize()
         {
@@ -267,6 +270,9 @@ namespace MoreHead
                 // 清空标签按钮字典
                 tagFilterButtons.Clear();
                 
+                // 创建装备方案切换按钮
+                CreateOutfitButtons(page);
+                
                 // 标签按钮的水平间距
                 const int buttonSpacing = 35; // 减小间距，使按钮靠近一点
                 // 起始X坐标
@@ -341,7 +347,8 @@ namespace MoreHead
                 // 然后更新标签按钮高亮状态
                 UpdateTagButtonHighlights();
                 
-                //Logger?.LogInfo($"切换到标签: {tag}");
+                // 确保按钮状态正确显示
+                UpdateButtonStates();
             }
             catch (Exception e)
             {
@@ -373,16 +380,11 @@ namespace MoreHead
                             if (buttonTextCache.TryGetValue(currentTagFilter, out var textCache) && 
                                 textCache.TryGetValue(decoration.Name ?? string.Empty, out buttonText))
                             {
-                                // 如果是LIMBS标签，确保按钮文本反映了当前状态
-                                if (currentTagFilter == "LIMBS")
-                                {
-                                    // 重新计算按钮文本，确保反映当前状态
-                                    buttonText = GetButtonText(decoration, decoration.IsVisible);
-                                    
-                                    // 更新缓存
-                                    textCache[decoration.Name ?? string.Empty] = buttonText;
-                                }
-                                // 使用缓存的按钮文本
+                                // 无论是否从缓存获取，都要确保状态是最新的
+                                buttonText = GetButtonText(decoration, decoration.IsVisible);
+                                
+                                // 更新缓存
+                                textCache[decoration.Name ?? string.Empty] = buttonText;
                             }
                             else
                             {
@@ -403,6 +405,9 @@ namespace MoreHead
                 
                 // 更新标签按钮高亮状态
                 UpdateTagButtonHighlights();
+                
+                // 更新装备方案按钮高亮状态
+                UpdateOutfitButtonHighlights();
             }
             catch (Exception e)
             {
@@ -801,6 +806,7 @@ namespace MoreHead
                 buttonMarkers.Clear();
                 tagScrollViewElements.Clear();
                 tagFilterButtons.Clear();
+                outfitButtons.Clear();
                 
                 // 销毁现有页面
                 if (decorationsPage != null && decorationsPage.gameObject != null)
@@ -1062,6 +1068,116 @@ namespace MoreHead
             catch (Exception e)
             {
                 Logger?.LogError($"延迟显示标签装饰物时出错: {e.Message}");
+            }
+        }
+
+        // 创建装备方案切换按钮
+        private static void CreateOutfitButtons(REPOPopupPage? page)
+        {
+            try
+            {
+                // 清空装备方案按钮字典
+                outfitButtons.Clear();
+                
+                // 获取当前选中的方案索引
+                int currentOutfit = ConfigManager.GetCurrentOutfitIndex();
+                
+                // 按钮的垂直间距
+                const int buttonSpacing = 25;
+                // 固定X坐标
+                const int x = 640;
+                // 起始Y坐标
+                const int startY = 260; 
+                
+                // 为每个装备方案创建按钮
+                for (int i = 1; i <= 5; i++)
+                {
+                    int outfitIndex = i; // 捕获循环变量
+                    
+                    // 如果是当前选中的方案，则使用加粗效果
+                    string buttonText = outfitIndex == currentOutfit ?
+                        $"<size=14><color=#FFCC00><b>{outfitIndex}</b></color></size>" :
+                        $"<size=14><color=#CCCCCC>{outfitIndex}</color></size>";
+                    
+                    // 计算按钮位置 - 垂直排列，从上到下
+                    int yPosition = startY - (i - 1) * buttonSpacing;
+                    
+                    page?.AddElement(parent => {
+                        var button = MenuAPI.CreateREPOButton(
+                            buttonText, 
+                            () => OnOutfitButtonClick(outfitIndex), 
+                            parent, 
+                            new Vector2(x, yPosition)
+                        );
+                        
+                        // 添加到装备方案按钮字典
+                        outfitButtons[outfitIndex] = button;
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"创建装备方案按钮时出错: {e.Message}");
+            }
+        }
+        
+        // 装备方案按钮点击事件
+        private static void OnOutfitButtonClick(int outfitIndex)
+        {
+            try
+            {
+                // 获取当前选中的方案索引
+                int currentOutfit = ConfigManager.GetCurrentOutfitIndex();
+                
+                // 如果点击的是当前方案，不做切换操作
+                if (outfitIndex == currentOutfit)
+                {
+                    return;
+                }
+                
+                // 切换到新的装备方案
+                ConfigManager.SwitchOutfit(outfitIndex);
+                
+                // 更新装备方案按钮高亮状态
+                UpdateOutfitButtonHighlights();
+                
+                // 更新装饰物状态
+                UpdateDecorations();
+                
+                // 更新按钮状态
+                UpdateButtonStates();
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"切换装备方案时出错: {e.Message}");
+            }
+        }
+        
+        // 更新装备方案按钮高亮状态
+        private static void UpdateOutfitButtonHighlights()
+        {
+            try
+            {
+                // 获取当前选中的方案索引
+                int currentOutfit = ConfigManager.GetCurrentOutfitIndex();
+                
+                // 更新每个装备方案按钮的高亮状态
+                for (int i = 1; i <= 5; i++)
+                {
+                    if (outfitButtons.TryGetValue(i, out REPOButton button))
+                    {
+                        // 如果是当前选中的方案，则使用加粗效果
+                        string buttonText = i == currentOutfit ?
+                            $"<size=14><color=#FFCC00><b>{i}</b></color></size>" :
+                            $"<size=14><color=#CCCCCC>{i}</color></size>";
+                        
+                        button.labelTMP.text = buttonText;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"更新装备方案按钮高亮状态时出错: {e.Message}");
             }
         }
     }

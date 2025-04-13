@@ -6,9 +6,9 @@
         <LangVersion>latest</LangVersion>
         
         <!-- 添加程序集版本信息 -->
-        <AssemblyVersion>1.3.6.0</AssemblyVersion>
-        <FileVersion>1.3.6.0</FileVersion>
-        <Version>1.3.6</Version>
+        <AssemblyVersion>1.3.7.0</AssemblyVersion>
+        <FileVersion>1.3.7.0</FileVersion>
+        <Version>1.3.7</Version>
         <Authors>Masaicker, YurisCat</Authors>
         <Company>YMC_MHZ</Company>
         <Product>MoreHead</Product>
@@ -39,7 +39,7 @@
         <HintPath>E:\Steam\steamapps\common\REPO\REPO_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
       </Reference>
       <Reference Include="MenuLib">
-        <HintPath>..\..\..\lib\MenuLib\2.1.3\MenuLib.dll</HintPath>
+        <HintPath>..\..\..\lib\MenuLib\2.3.0\MenuLib.dll</HintPath>
       </Reference>
       <Reference Include="Newtonsoft.Json">
         <HintPath>E:\Steam\steamapps\common\REPO\REPO_Data\Managed\Newtonsoft.Json.dll</HintPath>

@@ -16,7 +16,7 @@ public class Morehead : BaseUnityPlugin
 {
     private const string PluginGuid = "Mhz.REPOMoreHead";
     private const string PluginName = "MoreHead";
-    private const string PluginVersion = "1.3.6";
+    private const string PluginVersion = "1.3.7";
     // 单例实例
     public static Morehead? Instance { get; private set; }
     
@@ -100,7 +100,7 @@ class MenuManagerStartPatch
             // 检查MenuManager实例和菜单页面是否准备好
             if (MenuManager.instance != null && MenuManager.instance.menuPages != null && MenuManager.instance.menuPages.Count > 0)
             {
-                Morehead.Logger?.LogInfo("MenuManager已初始化，正在初始化MoreHeadUI...");
+                // Morehead.Logger?.LogInfo("MenuManager已初始化，正在初始化MoreHeadUI...");
                 // 初始化UI
                 MoreHeadUI.Initialize();
             }
