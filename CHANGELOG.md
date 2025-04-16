@@ -1,3 +1,7 @@
+# v1.3.10
+* 新增配置选项，可自定义ESC菜单和大厅按钮的位置坐标
+* Added config options to customize button position in ESC menu and lobby
+
 # v1.3.9
 * 将装备方案切换快捷键从Ctrl+1-5改为F1-F5
 * Changed outfit switching shortcuts from Ctrl+1-5 to F1-F5

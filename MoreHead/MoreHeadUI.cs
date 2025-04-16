@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using System.IO;
 using MenuLib.MonoBehaviors;
 using MenuLib.Structs;
+using BepInEx.Configuration;
 
 namespace MoreHead
 {
@@ -45,6 +46,14 @@ namespace MoreHead
         // 头像预览组件
         private static REPOAvatarPreview? avatarPreview;
 
+        // 大厅按钮位置配置
+        private static ConfigEntry<float>? lobbyButtonPosX;
+        private static ConfigEntry<float>? lobbyButtonPosY;
+        
+        // ESC菜单按钮位置配置
+        private static ConfigEntry<float>? escButtonPosX;
+        private static ConfigEntry<float>? escButtonPosY;
+
         // 按钮和页面名称常量
         private const string BUTTON_NAME = "<color=#FF0000>M</color><color=#FF3300>O</color><color=#FF6600>R</color><color=#FF9900>E</color><color=#FFCC00>H</color><color=#FFDD00>E</color><color=#FFEE00>A</color><color=#FFFF00>D</color>";
         private static readonly string PAGE_TITLE = $"Rotate robot: A/D <size=12><color=#AAAAAA>v{Morehead.GetPluginVersion()}</color></size>";
@@ -66,16 +75,54 @@ namespace MoreHead
         {
             try
             {
+                // 初始化ESC菜单按钮位置配置
+                escButtonPosX = Morehead.Instance?.Config.Bind(
+                    "UI",
+                    "EscButtonPosX",
+                    0f,
+                    new ConfigDescription("ESC menu button X position", new AcceptableValueRange<float>(0f, 618f))
+                );
+                
+                escButtonPosY = Morehead.Instance?.Config.Bind(
+                    "UI", 
+                    "EscButtonPosY",
+                    0f,
+                    new ConfigDescription("ESC menu button Y position", new AcceptableValueRange<float>(0f, 360f))
+                );
+
+                // 初始化大厅按钮位置配置
+                lobbyButtonPosX = Morehead.Instance?.Config.Bind(
+                    "UI",
+                    "LobbyButtonPosX",
+                    0f,
+                    new ConfigDescription("Lobby button X position", new AcceptableValueRange<float>(0f, 618f))
+                );
+                
+                lobbyButtonPosY = Morehead.Instance?.Config.Bind(
+                    "UI", 
+                    "LobbyButtonPosY",
+                    0f,
+                    new ConfigDescription("Lobby button Y position", new AcceptableValueRange<float>(0f, 360f))
+                );
+                
                 // 创建ESC菜单按钮
                 MenuAPI.AddElementToEscapeMenu(parent =>
                 {
-                    MenuAPI.CreateREPOButton(BUTTON_NAME, OnMenuButtonClick, parent, Vector2.zero);
+                    Vector2 buttonPos = new Vector2(
+                        escButtonPosX?.Value ?? 0f,
+                        escButtonPosY?.Value ?? 0f
+                    );
+                    MenuAPI.CreateREPOButton(BUTTON_NAME, OnMenuButtonClick, parent, buttonPos);
                 });
                 
                 // 创建大厅按钮
                 MenuAPI.AddElementToLobbyMenu(parent =>
                 {
-                    MenuAPI.CreateREPOButton(BUTTON_NAME, OnMenuButtonClick, parent, Vector2.zero);
+                    Vector2 buttonPos = new Vector2(
+                        lobbyButtonPosX?.Value ?? 0f,
+                        lobbyButtonPosY?.Value ?? 0f
+                    );
+                    MenuAPI.CreateREPOButton(BUTTON_NAME, OnMenuButtonClick, parent, buttonPos);
                 });
                 
                 // 初始化数据缓存
