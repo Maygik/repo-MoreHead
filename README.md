@@ -1,6 +1,12 @@
 ---
 <small>
 
+This fork aims to implement groups to MoreHead
+Groups can be added to existing models by simply renaming to the format
+"Model Name¬Group Name_part.hhh"
+Should be backwards compatible
+
+
 **All models were created by Yuri's cat Calypso, specifically for this mod :3**
 <br>
 **所有的模型由[尤里的猫·卡里普索](https://space.bilibili.com/1704421)为了这个模组而制作:3**
