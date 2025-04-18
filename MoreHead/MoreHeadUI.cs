@@ -12,6 +12,7 @@ using System.IO;
 using MenuLib.MonoBehaviors;
 using MenuLib.Structs;
 using BepInEx.Configuration;
+using System.Xml.Linq;
 
 namespace MoreHead
 {
@@ -32,7 +33,11 @@ namespace MoreHead
         
         // 按标签分类的滚动视图元素字典
         private static Dictionary<string, List<REPOScrollViewElement>> tagScrollViewElements = new();
-        
+        // Dictionary of tags and the group that each element in that tag belongs to
+        private static Dictionary<string, List<string?>> tagGroupElements = new();
+
+        private static Dictionary<string, bool> activeGroups = new();
+
         // 标签筛选器
         private static string currentTagFilter = "ALL";
         private static Dictionary<string, REPOButton> tagFilterButtons = new();
@@ -587,7 +592,15 @@ namespace MoreHead
                 Logger?.LogError($"切换装饰物 {decorationName} 状态时出错: {e.Message}");
             }
         }
-        
+
+        private static void OnDecorationGroupButtonClick(string? groupName)
+        {
+            Logger?.LogInfo($"Group Pressed: {groupName} and was {activeGroups[groupName]}");
+            activeGroups[groupName] = !activeGroups[groupName];
+            Logger?.LogInfo($"It is now {activeGroups[groupName]}");
+            ShowTagDecorations(currentTagFilter, false);
+        }
+
         // 获取按钮文本
         private static string GetButtonText(DecorationInfo decoration, bool isEnabled)
         {
@@ -900,6 +913,7 @@ namespace MoreHead
                 foreach (string tag in ALL_TAGS)
                 {
                     tagScrollViewElements[tag] = new List<REPOScrollViewElement>();
+                    tagGroupElements[tag] = new List<string>();
                 }
                 
                 // 获取所有装饰物并分为内置模型和外部模型
@@ -907,12 +921,14 @@ namespace MoreHead
                 
                 var builtInDecorations = allDecorations
                     .Where(decoration => IsBuiltInDecoration(decoration))
-                    .OrderBy(decoration => decoration.DisplayName)
+                    .OrderBy(decoration => decoration.Group)
+                    .ThenBy(decoration => decoration.DisplayName)
                     .ToList();
                 
                 var externalDecorations = allDecorations
                     .Where(decoration => !IsBuiltInDecoration(decoration))
-                    .OrderBy(decoration => decoration.DisplayName)
+                    .OrderBy(decoration => decoration.Group)
+                    .ThenBy(decoration => decoration.DisplayName)
                     .ToList();
                 
                 // 创建所有内置装饰物按钮
@@ -940,6 +956,21 @@ namespace MoreHead
         {
             try
             {
+
+                // Add group button if not already made
+                if (decoration.Group != null && decoration.Group != "")
+                {
+                    if (tagGroupElements.TryGetValue("ALL", out var groupElements))
+                    {
+                        activeGroups.TryAdd(decoration.Group, false);
+
+                        if (!groupElements.Contains(decoration.Group))
+                        {
+                            CreateGroupButton(page, decoration.Group);
+                        }
+                    }
+                }
+
                 // 获取装饰物名称和标签
                 string? decorationName = decoration.Name;
                 string? parentTag = decoration.ParentTag;
@@ -987,7 +1018,8 @@ namespace MoreHead
                 
                 // 创建按钮
                 REPOButton? repoButton = null;
-                
+
+
                 page.AddElementToScrollView(scrollView => {
                     repoButton = MenuAPI.CreateREPOButton(
                         buttonText, 
@@ -1013,17 +1045,25 @@ namespace MoreHead
                     
                     // 将按钮添加到对应的标签分类中
                     tagScrollViewElements["ALL"].Add(repoButton.repoScrollViewElement);
-                    
+                    // Add a group tag for the scroll element
+                    tagGroupElements["ALL"].Add(decoration.Group);
+
                     // 处理四肢装饰物的特殊情况
                     if (LIMB_TAGS.Contains(parentTag.ToUpper()))
                     {
                         // 同时添加到LIMBS标签分类
                         tagScrollViewElements["LIMBS"].Add(repoButton.repoScrollViewElement);
+                        tagGroupElements["LIMBS"].Add(decoration.Group);
                     }
                     // 同时添加到父标签分类
-                    else if (tagScrollViewElements.TryGetValue(parentTag.ToUpper(), out var elements))
+                    else 
                     {
-                        elements.Add(repoButton.repoScrollViewElement);
+                        if (tagScrollViewElements.TryGetValue(parentTag.ToUpper(), out var elements))
+                        {
+                            elements.Add(repoButton.repoScrollViewElement);
+                            tagGroupElements[parentTag.ToUpper()].Add(decoration.Group);
+                        }
+
                     }
                 }
             }
@@ -1033,6 +1073,35 @@ namespace MoreHead
             }
         }
         
+        // Create a title for the group
+        private static void CreateGroupButton(REPOPopupPage page, string groupName)
+        {
+            try
+            {
+                // I'm not going to figure this out right now
+                //string buttonText = $"<size=20>{(activeGroups[groupName] ? "<color=#777777>[+]</color>" : "<color=#CCCCCC>[-]</color>")} {groupName}</size>";
+                string buttonText = $"<size=20>-{groupName}-</size>";
+
+                // 创建按钮
+                REPOButton? repoButton = null;
+
+                page.AddElementToScrollView(scrollView => {
+                    repoButton = MenuAPI.CreateREPOButton(
+                        buttonText,
+                        () => OnDecorationGroupButtonClick(groupName),
+                        scrollView
+                    );
+
+                    return repoButton.rectTransform;
+                });
+            }
+            catch (Exception e)
+            {
+                Logger?.LogError($"Error creating group button: {e.Message}");
+            }
+        }
+
+
         // 添加操作按钮（关闭、清除所有）
         private static void AddActionButtons(REPOPopupPage page)
         {
@@ -1065,7 +1134,7 @@ namespace MoreHead
         }
         
         // 显示指定标签的装饰物
-        private static void ShowTagDecorations(string tag)
+        private static void ShowTagDecorations(string tag, bool resetPosition = false)
         {
             try
             {
@@ -1074,27 +1143,47 @@ namespace MoreHead
                     return;
                 
                 // 隐藏当前标签的装饰物按钮
-                if (!string.IsNullOrEmpty(currentTagFilter) && 
-                    tagScrollViewElements.TryGetValue(currentTagFilter, out var currentElements))
+                List<REPOScrollViewElement> elements;
+                List<string?> groups;
+                tagScrollViewElements.TryGetValue(currentTagFilter, out elements);
+                tagGroupElements.TryGetValue(currentTagFilter, out groups);
+
+                Logger?.LogInfo($"There are {elements.Count()} scroll elements and {groups.Count()} grouped elements");
+
+                if (!string.IsNullOrEmpty(currentTagFilter))
                 {
-                    foreach (var element in currentElements)
+                    for (int i = 0; i < elements.Count(); ++i)
                     {
-                        if (element != null)
+                        if (elements[i] != null)
                         {
-                            element.visibility = false;
+                            elements[i].visibility = false;
                         }
                     }
                 }
-                
+
                 // 显示新标签的装饰物按钮
-                if (!string.IsNullOrEmpty(tag) && 
-                    tagScrollViewElements.TryGetValue(tag, out var newElements))
+                tagScrollViewElements.TryGetValue(tag, out elements);
+                tagGroupElements.TryGetValue(tag, out groups);
+
+                Logger?.LogInfo($"There are {elements.Count()} tagged scroll elements and {groups.Count()} tagged grouped elements");
+
+                if (!string.IsNullOrEmpty(tag))
                 {
-                    foreach (var element in newElements)
+                    for (int i = 0; i < elements.Count(); ++i)
                     {
-                        if (element != null)
+                        if (groups[i] == null)
                         {
-                            element.visibility = true;
+                            if (elements[i] != null)
+                            {
+                                elements[i].visibility = true;
+                            }
+                        }
+                        else
+                        {
+                            if (elements[i] != null && activeGroups[groups[i]])
+                            {
+                                elements[i].visibility = true;
+                            }
                         }
                     }
                 }
@@ -1103,7 +1192,8 @@ namespace MoreHead
                 currentTagFilter = tag;
                 
                 // 更新滚动视图
-                decorationsPage.scrollView.SetScrollPosition(0);
+                if (resetPosition)
+                    decorationsPage.scrollView.SetScrollPosition(0);
                 decorationsPage.scrollView.UpdateElements();
             }
             catch (Exception e)

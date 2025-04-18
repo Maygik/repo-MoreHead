@@ -32,6 +32,8 @@ namespace MoreHead
         
         // 所属模组名称
         public string? ModName { get; set; }
+
+        public string? Group { get; set; }
     }
     
     // 头部装饰物管理器
@@ -210,7 +212,7 @@ namespace MoreHead
                     if (parts.Length >= 2)
                     {
                         // 最后一部分作为标签
-                        string? possibleTag = parts[parts.Length - 1].ToLower();
+                        string? possibleTag = parts[^1].ToLower();
                         
                         // 检查是否是有效的父级标签
                         if (parentPathMap.ContainsKey(possibleTag))
@@ -219,6 +221,16 @@ namespace MoreHead
                             // 重建装饰物名称（不包括标签部分）
                             bundleBaseName = string.Join("_", parts, 0, parts.Length - 1);
                         }
+                    }
+                }
+
+                string? group = null;
+                if (bundleBaseName.Contains("¬"))
+                {
+                    string[] parts = bundleBaseName.Split('¬');
+                    if (parts.Length >= 2)
+                    {
+                        group = parts[^1].ToLower();
                     }
                 }
                 
@@ -318,7 +330,8 @@ namespace MoreHead
                         Prefab = prefab,
                         ParentTag = parentTag,
                         BundlePath = bundlePath,
-                        ModName = GetModNameFromPath(bundlePath)
+                        ModName = GetModNameFromPath(bundlePath),
+                        Group = group
                     };
                     
                     // 添加到装饰物列表
